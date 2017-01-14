@@ -5,7 +5,7 @@
 1. Download project as a .ZIP file
 2. Extract the downloaded .ZIP to your Eclipse workspace
 3. In Eclipse, go to File -> Open Projects from File System...
-4. In the dialog that opens, click the "Directory..." button and navigate to the "5468_2017_Code" folder
+4. In the dialog that opens, click the "Directory..." button and navigate to the "5468_2017_Code" folder located within the "FRC2017-master" folder you just extracted
 5. Click "Finish", and you're done!
 
 # Helpful References
