@@ -20,7 +20,6 @@ public class Robot extends IterativeRobot
 	@Override
 	public void robotInit() 
 	{
-
 	}
 
 	/**
@@ -31,7 +30,6 @@ public class Robot extends IterativeRobot
 	@Override
 	public void disabledInit() 
 	{
-
 	}
 
 	@Override
