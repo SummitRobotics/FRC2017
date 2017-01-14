@@ -3,7 +3,7 @@
 
 Please review the wiki for info: https://github.com/SummitRobotics/FRC2017/wiki
 
-# How to download and modify code
+# How to download and modify the code
 Go [here](https://github.com/SummitRobotics/FRC2017/wiki/Code-Downloading-and-Modifying) for info on how to download and import the code and also how to suggest modifications or make changes to the main repository
 
 # Helpful References
