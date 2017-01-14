@@ -1,6 +1,8 @@
 # Team 5468 - Chaos Theory FRC 2017 Code
 2017 season code for FRC Team 5468 - Chaos Theory
 
+Please review the wiki for info: https://github.com/SummitRobotics/FRC2017/wiki
+
 # How to download and modify code
 Go [here](https://github.com/SummitRobotics/FRC2017/wiki/Code-Downloading-and-Modifying) for info on how to download and import the code and also how to suggest modifications or make changes to the main repository
 
