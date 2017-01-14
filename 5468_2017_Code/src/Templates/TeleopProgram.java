@@ -3,8 +3,8 @@ package Templates;
 import org.usfirst.frc.team5468.robot.Robot;
 
 public abstract class TeleopProgram {
-	Robot mainRobot;
-	String programName;
+	public Robot mainRobot;
+	public String programName;
 	public TeleopProgram(Robot robot,String name)
 	{
 		mainRobot = robot;

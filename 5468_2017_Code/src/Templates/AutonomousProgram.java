@@ -3,8 +3,8 @@ package Templates;
 import org.usfirst.frc.team5468.robot.Robot;
 
 public abstract class AutonomousProgram {
-	Robot mainRobot;
-	String programName;
+	public Robot mainRobot;
+	public String programName;
 	
 	//assign the paramaters of constructor to the class
 	public AutonomousProgram(Robot robot, String program){
