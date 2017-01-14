@@ -9,7 +9,7 @@
 5. Click "Finish", and you're done!
 
 # Helpful References
-5468 Code Wiki: 
+5468 Code Wiki: https://github.com/SummitRobotics/FRC2017/wiki
 
 FIRST WPI Java Documentaion: http://first.wpi.edu/FRC/roborio/release/docs/java/
 
