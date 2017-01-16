@@ -6,8 +6,8 @@ import edu.wpi.first.wpilibj.smartdashboard.*;
 
 public class Robot extends IterativeRobot 
 {
-	RobotMap robotMap;
-	ProgramManager programManager;
+	public RobotMap robotMap;
+	public ProgramManager programManager;
 	
 	SendableChooser<String> autoChooser;
 	SendableChooser<String> teleopChooser;
