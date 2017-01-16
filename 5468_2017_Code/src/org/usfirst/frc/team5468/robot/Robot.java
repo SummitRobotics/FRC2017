@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.smartdashboard.*;
 
 public class Robot extends IterativeRobot 
 {
-	public RobotMap robotMap;
+	public RobotMap hardwareMap;
 	public ProgramManager programManager;
 	
 	SendableChooser<String> autoChooser;
@@ -22,7 +22,7 @@ public class Robot extends IterativeRobot
 	public void robotInit() 
 	{
 		//initialize your life
-		robotMap = new RobotMap(this);
+		hardwareMap = new RobotMap(this);
 		programManager = new ProgramManager(this);
 		
 		autoChooser = new SendableChooser<String>();
