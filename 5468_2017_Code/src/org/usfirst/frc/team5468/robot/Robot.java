@@ -2,6 +2,7 @@
 package org.usfirst.frc.team5468.robot;
 import Templates.*;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.*;
 
 public class Robot extends IterativeRobot 
@@ -9,12 +10,16 @@ public class Robot extends IterativeRobot
 	public RobotMap hardwareMap;
 	public ProgramManager programManager;
 	
+	public Joystick gamepad1;
+	public Joystick gamepad2;
+	
 	SendableChooser<String> autoChooser;
 	SendableChooser<String> teleopChooser;
 	
 	AutonomousProgram auto = null;
 	TeleopProgram teleop = null;
-	/**
+	
+	/*
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
 	 */
@@ -30,6 +35,7 @@ public class Robot extends IterativeRobot
 		
 		//arrange all given classes for the USER and GUI
 		setupProgramChooser();
+		setupJoysticks();
 	}
 
 	/**
@@ -128,5 +134,17 @@ public class Robot extends IterativeRobot
 		
 		SmartDashboard.putData("Autonomous Chooser", autoChooser);
 		SmartDashboard.putData("Teleop Chooser", teleopChooser);
+	}
+	
+	public void setupJoysticks()
+	{
+		try
+		{
+			gamepad1 = new Joystick(1);
+			gamepad2 = new Joystick(2);
+		} catch (Exception e)
+		{
+			
+		}
 	}
 }
