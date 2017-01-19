@@ -2,36 +2,43 @@ package Plugins;
 
 public class GeneralFunctions 
 {
-	//This function clamps a given value to within a range from min to max
+	/*This is a clamping function
+	 * Parameters:
+	 * 		- value: the value to clamp
+	 * 		- min: the minimum value that "value" can be
+	 * 		- max: the maximum value that "value" can be
+	 */
 	public static double clamp(double value, double min, double max)
 	{
-		//If the value is less than the minimum, set the value to the minimum
+		//Clamp the value to not be lower than the minimum value
 		if(value < min)
 		{
 			value = min;
 		}
 		
-		//If the value is greater than the maximum, set the value to the maximum
+		//Clamp the value to not be greater than the maximum value
 		if(value > max)
 		{
 			value = max;
 		}
 		
-		//Return the (potentially) modified value
 		return value;
 	}
 	
-	//This function creates a deadzone for a joystick value
+	/*This is a deadzone creation function
+	 * Parameters:
+	 * 		- joystickValue: the value of the joystick
+	 * 		- deadzone: the range of the deadzone to create
+	 */
 	public static double deadzone(double joystickValue, double deadzone)
 	{
-		//If the joystick value lies within the deadzone...
+		//if the joystickValue falls within the range of the deadzone...
 		if (Math.abs(joystickValue) < deadzone)
 		{
-			//Set the joystick value
+			//Set the joystick value to 0
 			joystickValue = 0;
 		}
 		
-		//Return the (potentially) modified joystick value
 		return joystickValue;
 	}
 }
