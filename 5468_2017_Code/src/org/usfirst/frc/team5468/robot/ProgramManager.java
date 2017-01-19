@@ -1,81 +1,110 @@
 package org.usfirst.frc.team5468.robot;
+import java.util.ArrayList;
 import java.util.List;
 import Templates.*;
 import TeleopPrograms.*;
 
-//find and assign classes given index or string
-public class ProgramManager {
-	//quantity of classes that exist per group
+public class ProgramManager 
+{
+	//These hold the number of autonomous and teleop programs
 	public int autonomousProgramCount;
 	public int teleopProgramCount;
 	
-	//where lists of classes are compiled
+	//These hold lists of the autonomous and teleop program classes
 	public List<AutonomousProgram> autonomousPrograms;
 	public List<TeleopProgram> teleopPrograms;	
 	
+	//Called when an instance of this class is created
 	public ProgramManager(Robot robot)
 	{
-		// this is where we manually input programs that we will need
+		//Setup the autonomous and teleop program lists (makes the variables no longer null)
+		autonomousPrograms = new ArrayList<>();
+		teleopPrograms = new ArrayList<>();
+		
+		//Add the robot's autonomous programs here...
+		
+		//Add the robot's teleop programs here...
 		teleopPrograms.add(new TeleopTest(robot, "Teleop Test"));
 		
-		//find the numbers of classes
+		//Cache the number of autonomous and teleop classes
 		autonomousProgramCount = autonomousPrograms.size();
 		teleopProgramCount = teleopPrograms.size();
 		
 	}
 	
-	//find autonomous program via integer
+	//Find an autonomous program via an index
 	public AutonomousProgram getAutonomousProgram(int index)
 	{
+		//If the index of the program we're looking for is within the range of indices of our autonomous programs...
 		if(index >= 0 && index < autonomousProgramCount)
 		{
+			//Return the autonomous program that corresponds to the current index
 			return autonomousPrograms.get(index);
 		}
+		
+		//The index is incorrect, so return nothing
 		return null;
 	}
 	
-	//search for autonomous program via string
+	//Find an autonomous program via its name
 	public AutonomousProgram getAutonomousProgram(String name)
 	{
-		//return error if string is not matched
+		//Setup a return variable and initialize it to null as an error state
 		AutonomousProgram program = null;
-		for(int a = 0; a < autonomousProgramCount; ++a)
+		
+		//For each autonomous program...
+		for(int i = 0; i < autonomousProgramCount; i++)
 		{
-			if(getAutonomousProgram(a).programName == name)
+			//Check whether the name of the current autonomous program we're checking is the same as the given name
+			if(getAutonomousProgram(i).programName == name)
 			{
-				//assign the matching class
-				program = getAutonomousProgram(a);
-				return program;
+				//Set the return variable to be this autonomous program (since we found a match)
+				program = getAutonomousProgram(i);
+				
+				//Break out of the for loop, since we found a match
+				break;
 			}
 		}
+		
+		//Return an autonomous program (if one was found)
 		return program;
 	}
 	
-	//find teleop program via integer
+	//Find a teleop program via an index
 	public TeleopProgram getTeleopProgram(int index)
 	{
+		//If the index of the program we're looking for is within the range of indices of our teleop programs...
 		if(index >= 0 && index < teleopProgramCount)
 		{
+			//Return the teleop program that corresponds to the current index
 			return teleopPrograms.get(index);
 		}
+		
+		//The index is incorrect, so return nothing
 		return null;
 	}
 
-	//find teleop program via string
+	//Find a teleop program via its name
 	public TeleopProgram getTeleopProgram(String name)
 	{
-		//return error if string is not matched
+		//Setup a return variable and initialize it to null as an error state
 		TeleopProgram program = null;
-		for(int a = 0; a < teleopProgramCount; ++a)
+		
+		//For each teleop program...
+		for(int i = 0; i < teleopProgramCount; i++)
 		{
-			if(getTeleopProgram(a).programName == name)
+			//Check whether the name of the current autonomous program we're checking is the same as the given name
+			if(getTeleopProgram(i).programName == name)
 			{
-				//since a matching name has been found
-				//assign the program
-				program = getTeleopProgram(a);
-				return program;
+				//Set the return variable to be this teleop program (since we found a match)
+				program = getTeleopProgram(i);
+				
+				//Break out of the for loop, since we found a match
+				break;
 			}
 		}
+		
+		//Return a teleop program (if one was found)
 		return program;
 	}
 		
