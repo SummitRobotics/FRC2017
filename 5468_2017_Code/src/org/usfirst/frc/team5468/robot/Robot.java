@@ -1,8 +1,10 @@
 
 package org.usfirst.frc.team5468.robot;
 import Templates.*;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.*;
 
 public class Robot extends IterativeRobot 
@@ -17,6 +19,8 @@ public class Robot extends IterativeRobot
 	//These are the instances of the gamepads that the users will be using
 	public Joystick gamepad1;
 	public Joystick gamepad2;
+	
+	public Preferences programPreferences;
 	
 	//These are the instances of the program choosers for the autonomous and teleop programs
 	SendableChooser<String> autoChooser;
@@ -41,11 +45,15 @@ public class Robot extends IterativeRobot
 		autoChooser = new SendableChooser<String>();
 		teleopChooser = new SendableChooser<String>();
 		
+		programPreferences = Preferences.getInstance();
+		
 		//Setup the program choosers
 		setupProgramChooser();
 		
 		//Setup the joysticks
 		setupJoysticks();
+		
+		CameraServer.getInstance().startAutomaticCapture();
 	}
 
 	/**

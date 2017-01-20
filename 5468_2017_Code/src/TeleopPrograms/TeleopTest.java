@@ -7,6 +7,10 @@ import Plugins.*;
 
 public class TeleopTest extends TeleopProgram
 {
+	public final double DRIVE_EXPONENT = 2.3;
+	
+	public double maxOutputPower = 1;
+	
 	//This is called when an instance of this class is created
 	public TeleopTest (Robot robot, String name)
 	{
@@ -18,7 +22,7 @@ public class TeleopTest extends TeleopProgram
 	public void teleopInit() 
 	{
 		// TODO Auto-generated method stub
-
+		maxOutputPower = mainRobot.programPreferences.getDouble("maxDrivePower", 1.0);
 	}
 
 	//Called periodically during teleop
@@ -30,6 +34,19 @@ public class TeleopTest extends TeleopProgram
 		{
 			//This just puts the X and Y values of the left joystick of the gamepad onto the smart dashboard
 			SmartDashboard.putString("Teleop Info", "Left: X: " + Double.toString(mainRobot.gamepad1.getX(Hand.kLeft)) + " Y: " + Double.toString(mainRobot.gamepad1.getY(Hand.kLeft)));
+			
+			double forwardsPower = GeneralFunctions.toExponential(GeneralFunctions.deadzone(mainRobot.gamepad1.getThrottle() - mainRobot.gamepad1.getZ(), 0.2), DRIVE_EXPONENT);
+			double turningPower = GeneralFunctions.toExponential(GeneralFunctions.deadzone(mainRobot.gamepad1.getX(Hand.kLeft), 0.2), DRIVE_EXPONENT);
+			
+			double leftPower = GeneralFunctions.clamp(forwardsPower+turningPower, -1, 1);
+			double rightPower = -GeneralFunctions.clamp(forwardsPower-turningPower, -1, 1);
+			
+			mainRobot.hardwareMap.lfDrive.set(leftPower);
+			mainRobot.hardwareMap.lrDrive.set(leftPower);
+			
+			mainRobot.hardwareMap.rfDrive.set(rightPower);
+			mainRobot.hardwareMap.rrDrive.set(rightPower);
+			
 		}
 	}
 
@@ -38,7 +55,16 @@ public class TeleopTest extends TeleopProgram
 	public void teleopDisabledInit() 
 	{
 		// TODO Auto-generated method stub
+		mainRobot.hardwareMap.lfDrive.set(0);
+		mainRobot.hardwareMap.lrDrive.set(0);
 		
+		mainRobot.hardwareMap.rfDrive.set(0);
+		mainRobot.hardwareMap.rrDrive.set(0);
+		
+		mainRobot.hardwareMap.lfDrive.disable();
+		mainRobot.hardwareMap.lrDrive.disable();
+		mainRobot.hardwareMap.rfDrive.disable();
+		mainRobot.hardwareMap.rrDrive.disable();
 	}
 
 	//Called periodically while the robot is disabled
