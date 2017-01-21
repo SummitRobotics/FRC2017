@@ -41,4 +41,11 @@ public class GeneralFunctions
 		
 		return joystickValue;
 	}
+	
+	public static double toExponential(double value, double exponent)
+	{
+		value = Math.pow(Math.abs(value), exponent) * Math.signum(value);
+		
+		return value;
+	}
 }
