@@ -23,17 +23,24 @@ public class TeleopTest extends TeleopProgram
 	@Override
 	public void teleopInit() 
 	{
-		// TODO Auto-generated method stub
 		maxOutputPower = mainRobot.programPreferences.getDouble("maxDrivePower", 1.0);
-		visionProc = new Vision(mainRobot.camera, 320, 240, 30);
+		
+		//Create a new instance of the vision system
+		visionProc = new Vision("Vision_Test", mainRobot.camera, 320, 240, 30);
+		
+		//Get the HSV mask parameters from the robot preferences and set them in the vision system
 		visionProc.setMaskParameters(mainRobot.programPreferences.getInt("Upper Hue", 80),
 				mainRobot.programPreferences.getInt("Upper Sat", 255),
 				mainRobot.programPreferences.getInt("Upper Val", 170), 
 				mainRobot.programPreferences.getInt("Lower Hue", 60), 
 				mainRobot.programPreferences.getInt("Lower Sat", 200),
 				mainRobot.programPreferences.getInt("Lower Val", 120));
+		
+		//Get camera settings from the robot preferences and set them
 		visionProc.setCameraParameters(mainRobot.programPreferences.getInt("Exposure", 1), 
 				mainRobot.programPreferences.getInt("WB", 5200));
+		
+		//Start vision processing
 		visionProc.startVision();
 	}
 
@@ -78,6 +85,7 @@ public class TeleopTest extends TeleopProgram
 		mainRobot.hardwareMap.rfDrive.disable();
 		mainRobot.hardwareMap.rrDrive.disable();
 		
+		//Stop the vision system
 		visionProc.stopVision();
 	}
 
