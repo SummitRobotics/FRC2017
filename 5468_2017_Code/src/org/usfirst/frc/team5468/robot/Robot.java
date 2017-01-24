@@ -1,6 +1,7 @@
 
 package org.usfirst.frc.team5468.robot;
 import Templates.*;
+import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
@@ -30,6 +31,8 @@ public class Robot extends IterativeRobot
 	AutonomousProgram auto = null;
 	TeleopProgram teleop = null;
 	
+	public UsbCamera camera;
+	
 	/*
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
@@ -53,7 +56,7 @@ public class Robot extends IterativeRobot
 		//Setup the joysticks
 		setupJoysticks();
 		
-		CameraServer.getInstance().startAutomaticCapture();
+		camera = CameraServer.getInstance().startAutomaticCapture();
 	}
 
 	/**
@@ -72,7 +75,7 @@ public class Robot extends IterativeRobot
 		
 		if(teleop != null)
 		{
-			teleop.teleopInit();
+			teleop.teleopDisabledInit();
 		}
 	}
 	

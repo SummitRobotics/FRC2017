@@ -11,6 +11,8 @@ public class TeleopTest extends TeleopProgram
 	
 	public double maxOutputPower = 1;
 	
+	Vision visionProc;
+	
 	//This is called when an instance of this class is created
 	public TeleopTest (Robot robot, String name)
 	{
@@ -23,6 +25,16 @@ public class TeleopTest extends TeleopProgram
 	{
 		// TODO Auto-generated method stub
 		maxOutputPower = mainRobot.programPreferences.getDouble("maxDrivePower", 1.0);
+		visionProc = new Vision(mainRobot.camera, 320, 240, 30);
+		visionProc.setMaskParameters(mainRobot.programPreferences.getInt("Upper Hue", 80),
+				mainRobot.programPreferences.getInt("Upper Sat", 255),
+				mainRobot.programPreferences.getInt("Upper Val", 170), 
+				mainRobot.programPreferences.getInt("Lower Hue", 60), 
+				mainRobot.programPreferences.getInt("Lower Sat", 200),
+				mainRobot.programPreferences.getInt("Lower Val", 120));
+		visionProc.setCameraParameters(mainRobot.programPreferences.getInt("Exposure", 1), 
+				mainRobot.programPreferences.getInt("WB", 5200));
+		visionProc.startVision();
 	}
 
 	//Called periodically during teleop
@@ -65,6 +77,8 @@ public class TeleopTest extends TeleopProgram
 		mainRobot.hardwareMap.lrDrive.disable();
 		mainRobot.hardwareMap.rfDrive.disable();
 		mainRobot.hardwareMap.rrDrive.disable();
+		
+		visionProc.stopVision();
 	}
 
 	//Called periodically while the robot is disabled
@@ -72,6 +86,11 @@ public class TeleopTest extends TeleopProgram
 	public void teleopDisabledPeriodic() 
 	{
 		// TODO Auto-generated method stub
+		
+	}
+	
+	public void getProgramPreferences()
+	{
 		
 	}
 }

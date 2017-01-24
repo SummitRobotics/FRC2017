@@ -15,6 +15,5 @@ public abstract class TeleopProgram {
 	public abstract void teleopPeriodic();
 	public abstract void teleopDisabledInit();
 	public abstract void teleopDisabledPeriodic();
-	
 }
 
