@@ -68,8 +68,10 @@ public class TeleopTest extends TeleopProgram
 			
 		}
 		
-		double rectangleThingy = visionProc.getRectangleArea();
-		SmartDashboard.putNumber("Rectangle Size", rectangleThingy);
+		double rectangleArea = visionProc.getRectangleArea();
+		double rectangleAspect = visionProc.getRectangleAspect();
+		SmartDashboard.putNumber("Rectangle Size", rectangleArea);
+		SmartDashboard.putNumber("Rectangle Size", rectangleAspect);
 	}
 
 	//Called once right when the robot is disabled
