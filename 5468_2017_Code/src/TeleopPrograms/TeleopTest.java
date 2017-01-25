@@ -67,6 +67,9 @@ public class TeleopTest extends TeleopProgram
 			mainRobot.hardwareMap.rrDrive.set(rightPower);
 			
 		}
+		
+		double rectangleThingy = visionProc.getRectangleArea();
+		SmartDashboard.putNumber("Rectangle Size", rectangleThingy);
 	}
 
 	//Called once right when the robot is disabled

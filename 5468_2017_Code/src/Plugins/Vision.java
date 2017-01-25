@@ -2,7 +2,15 @@ package Plugins;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.RotatedRect;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opencv.core.Core;
 
 import edu.wpi.cscore.CvSink;
@@ -99,6 +107,14 @@ public class Vision
 		camera.setExposureManual(exposure);
 		camera.setWhiteBalanceManual(whiteBalance);
 	}
+	
+	public double getRectangleArea()
+	{
+		if(visionThread != null)
+			return visionThread.rect.size.area();
+		
+		return 0;
+	}
 }
 
 //This is the class that will be executed on a separate thread
@@ -114,16 +130,23 @@ class VisionThread extends Thread
 	Mat inputImage;
 	Mat outputImage;
 	Mat hsvImage;
+	Mat hierarchy;
+	Mat rectangles;
 	
 	//HSV mask bounds
 	Scalar lowerBounds;
 	Scalar upperBounds;
 	
+	List<MatOfPoint> contours;
+	
 	//The time (in milliseconds) that the vision thread should wait
 	int threadWait;
 	
+	public volatile RotatedRect rect;
+	public volatile RotatedRect secondRect;
+	
 	//Called when an instance of this class is created
-	public VisionThread (String name, VideoSource videoSource, int width, int height, double updateFrequency)
+	public VisionThread (String name, VideoSource videoSource, int width, int height, int wait)
 	{
 		threadName = name;
 		
@@ -137,13 +160,20 @@ class VisionThread extends Thread
 		inputImage = new Mat();
 		outputImage = new Mat();
 		hsvImage = new Mat();
+		hierarchy = new Mat();
+		rectangles = new Mat();
+		
+		rect = new RotatedRect();
+		secondRect = new RotatedRect();
 		
 		//Calculate how long the thread should wait given a frequency
-		threadWait = (int)Math.round(1.0/updateFrequency);
+		threadWait = wait;
 		
 		//Intialize the HSV mask bounds to default values
 		lowerBounds = new Scalar(0,0,0);
 		upperBounds = new Scalar(0,0,0);
+		
+		contours = new ArrayList<MatOfPoint>();
 	}
 	
 	//This function sets the HSV mask parameters
@@ -162,8 +192,6 @@ class VisionThread extends Thread
 			//Loop until this thread is interrupted
 			while(!Thread.interrupted())
 			{
-				long startTime = System.nanoTime();
-				
 				//Get the most recent image from the camera and store it
 				videoIn.grabFrame(inputImage);
 				
@@ -173,15 +201,16 @@ class VisionThread extends Thread
 				//Process the target
 				processTarget();
 				
+				if(rect != null)
+				{
+					Imgproc.ellipse(inputImage, rect, new Scalar(255, 0, 0), 3);
+					Imgproc.ellipse(inputImage, secondRect, new Scalar(0, 0, 255), 3);
+				}
 				//Put the processed image into the server so that the smartdashboard can view it
-				videoOut.putFrame(outputImage);
-				
-				//Calculate how many milliseconds it took to run the vision processing code
-				long millisecondsTaken = (System.nanoTime() - startTime) % 1000;
-				long waitTime = threadWait - millisecondsTaken;
+				videoOut.putFrame(inputImage);
 				
 				//Have this thread wait for some time to achieve a certain framerate
-				Thread.sleep(waitTime);
+				Thread.sleep(1);
 			}
 			
 		}
@@ -200,6 +229,32 @@ class VisionThread extends Thread
 		
 		//Apply a color mask to the HSV image - and colors within the range are turned white, and the rest, black
 		Core.inRange(hsvImage, lowerBounds, upperBounds, outputImage);
+		
+		contours.clear();
+		
+		Imgproc.findContours(outputImage, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
+		
+		if (contours.size() > 0)
+		{
+			int biggestAreaIndex = 0;
+			int secondBiggestAreaIndex = 0;
+			double largestArea = 0;
+			
+			//Find the two largest contours and store them into their respective indexes
+			for(int i = 0; i < contours.size(); i++)
+			{
+				RotatedRect tempRect = Imgproc.minAreaRect(new MatOfPoint2f(contours.get(i).toArray()));
+				if(tempRect.size.area() > largestArea)
+				{
+					secondBiggestAreaIndex = biggestAreaIndex;
+					biggestAreaIndex = i;
+					largestArea = tempRect.size.area();
+				}
+			}
+			
+			rect = Imgproc.minAreaRect(new MatOfPoint2f(contours.get(biggestAreaIndex).toArray()));
+			secondRect = Imgproc.minAreaRect(new MatOfPoint2f(contours.get(secondBiggestAreaIndex).toArray()));
+		}
 	}
 	
 	//This function processes the HSV mask and works out target variables
