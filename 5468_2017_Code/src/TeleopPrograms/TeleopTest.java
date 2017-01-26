@@ -38,7 +38,8 @@ public class TeleopTest extends TeleopProgram
 		
 		//Get camera settings from the robot preferences and set them
 		visionProc.setCameraParameters(mainRobot.programPreferences.getInt("Exposure", 1), 
-				mainRobot.programPreferences.getInt("WB", 5200));
+				mainRobot.programPreferences.getInt("WB", 5200),
+				mainRobot.programPreferences.getInt("Brightness", 50));
 		
 		//Start vision processing
 		visionProc.startVision();
@@ -71,7 +72,12 @@ public class TeleopTest extends TeleopProgram
 		double rectangleArea = visionProc.getRectangleArea();
 		double rectangleAspect = visionProc.getRectangleAspect();
 		SmartDashboard.putNumber("Rectangle Size", rectangleArea);
-		SmartDashboard.putNumber("Rectangle Size", rectangleAspect);
+		SmartDashboard.putNumber("Rectangle Aspect", rectangleAspect);
+		SmartDashboard.putNumber("Rectangle Distance", visionProc.getDistance());
+		SmartDashboard.putNumber("Gyro Angle", mainRobot.hardwareMap.gyro.getAngle());
+		SmartDashboard.putNumber("Accelerometer x", mainRobot.hardwareMap.accelerometer.getX());
+		SmartDashboard.putNumber("Accelerometer y", mainRobot.hardwareMap.accelerometer.getY());
+		SmartDashboard.putNumber("Accelerometer z", mainRobot.hardwareMap.accelerometer.getZ());
 	}
 
 	//Called once right when the robot is disabled
