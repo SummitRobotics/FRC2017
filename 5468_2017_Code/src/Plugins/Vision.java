@@ -2,6 +2,7 @@ package Plugins;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.RotatedRect;
@@ -101,9 +102,10 @@ public class Vision
 	}
 	
 	//This function sets the camera's exposure and white balance
-	public void setCameraParameters(int exposure, int whiteBalance)
+	public void setCameraParameters(int exposure, int whiteBalance, int brightness)
 	{
 		camera.setExposureManual(exposure);
+		camera.setBrightness(brightness);
 		camera.setWhiteBalanceManual(whiteBalance);
 	}
 	
@@ -111,7 +113,7 @@ public class Vision
 	public double getRectangleArea()
 	{
 		if(visionThread != null && visionThread.targetsFound > 0)
-			return visionThread.target1.size.area();
+			return visionThread.target1.boundingRect().width;
 		
 		return 0;
 	}
@@ -124,12 +126,33 @@ public class Vision
 			
 		return 0;
 	}
+	
+	public double getDistance()
+	{
+		if(visionThread != null && visionThread.targetsFound > 0)
+			return visionThread.targetDistance;
+			
+		return 0;
+	}
 }
 
 //This is the class that will be executed on a separate thread
 class VisionThread extends Thread
 {
 	String threadName;
+	
+	final double minTargetSize = 5;
+	
+	final double cameraFOV = 60;
+	final double FOVDistance = 5;
+	final double targetWidth = 10.0 / 12.0;
+	final double targetWidthPixels = 61;
+	final double targetWidthConversion = targetWidth / targetWidthPixels;
+	
+	final double cameraFOVWidth = Math.tan(cameraFOV * 0.5 * (Math.PI / 180.0)) * FOVDistance;
+	
+	double imgWidth;
+	double imgHeight;
 	
 	//References to get and put video frames
 	CvSink videoIn;
@@ -139,7 +162,9 @@ class VisionThread extends Thread
 	Mat inputImage;
 	Mat outputImage;
 	Mat hsvImage;
+	Mat blurredImage;
 	Mat hierarchy;
+	Mat maskImage;
 	
 	//HSV mask bounds
 	Scalar lowerBounds;
@@ -155,11 +180,14 @@ class VisionThread extends Thread
 	public volatile RotatedRect target1;
 	public volatile RotatedRect target2;
 	public volatile int targetsFound;
-	
+	public volatile double targetDistance;
 	//Called when an instance of this class is created
 	public VisionThread (String name, VideoSource videoSource, int width, int height, double framerate)
 	{
 		threadName = name;
+		
+		imgWidth = videoSource.getVideoMode().width;
+		imgHeight = videoSource.getVideoMode().height;
 		
 		//Setup videoIn to serve video frames
 		videoIn = CameraServer.getInstance().getVideo(videoSource);
@@ -172,6 +200,8 @@ class VisionThread extends Thread
 		outputImage = new Mat();
 		hsvImage = new Mat();
 		hierarchy = new Mat();
+		blurredImage = new Mat();
+		maskImage = new Mat();
 		
 		//Initialize our target variables
 		target1 = new RotatedRect();
@@ -222,7 +252,8 @@ class VisionThread extends Thread
 				long elapsedTime = (System.nanoTime() - startTime) / 1000;
 				
 				//Have this thread wait for some time to achieve a certain framerate
-				Thread.sleep(Math.min(threadWait - elapsedTime, 1));
+				//Thread.sleep(Math.min(threadWait - elapsedTime, 1));
+				Thread.sleep(1);
 			}
 			
 		}
@@ -233,12 +264,15 @@ class VisionThread extends Thread
 	void processImage()
 	{
 		//Vision procession code goes here
+		Imgproc.blur(inputImage, blurredImage, new Size(2, 2));
+		
 		//Convert the RGB image into an HSV image
-		Imgproc.cvtColor(inputImage, hsvImage, Imgproc.COLOR_BGR2HSV);
+		Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
 		
 		//Apply a color mask to the HSV image - and colors within the range are turned white, and the rest, black
 		Core.inRange(hsvImage, lowerBounds, upperBounds, outputImage);
 		
+		maskImage = outputImage.clone();
 		//Clear the list of contours
 		contours.clear();
 		
@@ -299,6 +333,13 @@ class VisionThread extends Thread
 			{
 				target1 = Imgproc.minAreaRect(new MatOfPoint2f(contours.get(biggestAreaIndex).toArray()));
 				targetsFound++;
+				
+				targetDistance = calculateDistance(target1.boundingRect().width);
+				//average out variations of the distance over the duration
+				/*for(int a = 0; a < 10; ++a){
+					targetDistance = (targetDistance +  calculateDistance(target1.boundingRect().width)) /2;
+				}*/
+				
 			}
 			
 			//Store the second largest rectangle
@@ -324,7 +365,7 @@ class VisionThread extends Thread
 		}
 		
 		//Put the processed image into the server so that the smartdashboard can view it
-		videoOut.putFrame(inputImage);
+		videoOut.putFrame(maskImage);
 	}
 	
 	//This function returns whether a rectangle could potentially be a target
@@ -332,6 +373,13 @@ class VisionThread extends Thread
 	{
 		//TODO: Write code to filter out targets from possible noise
 		
-		return true;
+		return rect.size.area() > minTargetSize;
+	}
+	
+	double calculateDistance(double targetSizeX)
+	{
+		double targetWidthFt = targetSizeX * targetWidthConversion * 0.5;
+		double targetAngle = Math.atan((targetWidthFt * Math.tan(cameraFOV * 0.5 * (Math.PI / 180.0))) / cameraFOVWidth);
+		return (targetWidth * 0.5) / Math.tan(targetAngle);
 	}
 }

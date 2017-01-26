@@ -1,5 +1,7 @@
 package org.usfirst.frc.team5468.robot;
 
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.TalonSRX;
 import com.ctre.CANTalon;
 
@@ -15,6 +17,9 @@ public class RobotMap
 	public CANTalon lfDrive;
 	public CANTalon lrDrive;
 	
+	public ADXRS450_Gyro gyro;
+	public BuiltInAccelerometer accelerometer;
+	
 	//This is called when an instance of this class is created
 	public RobotMap()
 	{
@@ -26,10 +31,15 @@ public class RobotMap
 			lfDrive = new CANTalon(LF_DRIVE_ID);
 			lrDrive = new CANTalon(LR_DRIVE_ID);
 			
+			gyro = new ADXRS450_Gyro();
+			accelerometer = new BuiltInAccelerometer();
+			
 			rfDrive.enable();
 			rrDrive.enable();
 			lfDrive.enable();
 			lrDrive.enable();
+			
+			gyro.reset();
 		}
 		catch(Exception e)
 		{
