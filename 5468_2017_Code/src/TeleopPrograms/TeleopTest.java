@@ -68,12 +68,13 @@ public class TeleopTest extends TeleopProgram
 			mainRobot.hardwareMap.rrDrive.set(rightPower);
 			
 		}
-		
-		double rectangleArea = visionProc.getRectangleArea();
-		double rectangleAspect = visionProc.getRectangleAspect();
-		SmartDashboard.putNumber("Rectangle Size", rectangleArea);
-		SmartDashboard.putNumber("Rectangle Aspect", rectangleAspect);
-		SmartDashboard.putNumber("Rectangle Distance", visionProc.getDistance());
+
+		SmartDashboard.putNumber("Rectangle Area", visionProc.getRectangleArea());
+		SmartDashboard.putNumber("Rectangle Width", visionProc.getRectangleWidth());
+		SmartDashboard.putNumber("Rectangle Aspect", visionProc.getRectangleAspect());
+		SmartDashboard.putNumber("Rectangle Distance", visionProc.getTargetDistanceFromCamera());
+		SmartDashboard.putNumber("Rectangle X", visionProc.getTargetScreenX());
+		SmartDashboard.putNumber("Rectangle Y", visionProc.getTargetScreenY());
 		SmartDashboard.putNumber("Gyro Angle", mainRobot.hardwareMap.gyro.getAngle());
 		SmartDashboard.putNumber("Accelerometer x", mainRobot.hardwareMap.accelerometer.getX());
 		SmartDashboard.putNumber("Accelerometer y", mainRobot.hardwareMap.accelerometer.getY());
