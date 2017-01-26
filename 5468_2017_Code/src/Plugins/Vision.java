@@ -109,12 +109,21 @@ public class Vision
 		camera.setWhiteBalanceManual(whiteBalance);
 	}
 	
-	//This function returns the area of the current largest rectangle being tracked
-	public double getRectangleArea()
+	//This function returns the width of the current largest rectangle being tracked
+	public double getRectangleWidth()
 	{
 		if(visionThread != null && visionThread.targetsFound > 0)
 			return visionThread.target1.boundingRect().width;
 		
+		return 0;
+	}
+	
+	//This function returns the area of the current largest rectangle being tracked
+	public double getRectangleArea()
+	{
+		if(visionThread != null && visionThread.targetsFound > 0)
+			return visionThread.target1.size.area();
+			
 		return 0;
 	}
 	
@@ -127,10 +136,29 @@ public class Vision
 		return 0;
 	}
 	
-	public double getDistance()
+	//This function returns the distance that the currently tracked target is from the camera
+	public double getTargetDistanceFromCamera()
 	{
 		if(visionThread != null && visionThread.targetsFound > 0)
 			return visionThread.targetDistance;
+			
+		return 0;
+	}
+	
+	//This function returns the x screen position of the currently tracked target
+	public double getTargetScreenX()
+	{
+		if(visionThread != null && visionThread.targetsFound > 0)
+			return visionThread.target1.boundingRect().x;
+			
+		return 0;
+	}
+	
+	//This function returns the y screen position of the currently tracked target
+	public double getTargetScreenY()
+	{
+		if(visionThread != null && visionThread.targetsFound > 0)
+			return visionThread.target1.boundingRect().y;
 			
 		return 0;
 	}
@@ -141,18 +169,16 @@ class VisionThread extends Thread
 {
 	String threadName;
 	
-	final double minTargetSize = 5;
+	//Target filtering variables
+	final double minTargetSize = 5; //The minimum area a rectangle has to take up on-screen to be considered as a target
 	
-	final double cameraFOV = 60;
-	final double FOVDistance = 5;
-	final double targetWidth = 10.0 / 12.0;
-	final double targetWidthPixels = 61;
-	final double targetWidthConversion = targetWidth / targetWidthPixels;
-	
-	final double cameraFOVWidth = Math.tan(cameraFOV * 0.5 * (Math.PI / 180.0)) * FOVDistance;
-	
-	double imgWidth;
-	double imgHeight;
+	//Variables for calculating target distance
+	//To use distance calculation correctly, you must measure the width of a target (in pixels) from a known distance away from the camera
+	final double cameraFOV = 60; //The horizontal FOV of the camera (in degrees)
+	final double fovPlaneDistance = 5; //The distance from the camera that the target's size was measured (in feet)
+	final double targetWidth = 10.0 / 12.0; //The width of the target (this should be the width of the area actually seen by the camera)
+	final double targetWidthPixels = 61; //The width of the target on-screen measured at "fovPlaneDistance" away from the camera (in pixels)
+	final double targetWidthConversion = targetWidth / targetWidthPixels; //This creates a conversion to convert target width from pixels to feet
 	
 	//References to get and put video frames
 	CvSink videoIn;
@@ -181,13 +207,11 @@ class VisionThread extends Thread
 	public volatile RotatedRect target2;
 	public volatile int targetsFound;
 	public volatile double targetDistance;
+	
 	//Called when an instance of this class is created
 	public VisionThread (String name, VideoSource videoSource, int width, int height, double framerate)
 	{
 		threadName = name;
-		
-		imgWidth = videoSource.getVideoMode().width;
-		imgHeight = videoSource.getVideoMode().height;
 		
 		//Setup videoIn to serve video frames
 		videoIn = CameraServer.getInstance().getVideo(videoSource);
@@ -233,9 +257,7 @@ class VisionThread extends Thread
 		{	
 			//Loop until this thread is interrupted
 			while(!Thread.interrupted())
-			{
-				long startTime = System.nanoTime();
-				
+			{				
 				//Get the most recent image from the camera and store it
 				videoIn.grabFrame(inputImage);
 				
@@ -248,12 +270,8 @@ class VisionThread extends Thread
 				//Draws ellipses over the two tracked targets for debugging
 				visionDebug();
 				
-				//Calculate how much time has passed since we began analyzing this frame
-				long elapsedTime = (System.nanoTime() - startTime) / 1000;
-				
-				//Have this thread wait for some time to achieve a certain framerate
-				//Thread.sleep(Math.min(threadWait - elapsedTime, 1));
-				Thread.sleep(1);
+				//Have this thread wait for some time
+				Thread.sleep(Math.max(threadWait / 2, 1));
 			}
 			
 		}
@@ -263,21 +281,23 @@ class VisionThread extends Thread
 	//This function takes whatever image is stored in "inputImage" and processes it to find contours
 	void processImage()
 	{
-		//Vision procession code goes here
+		//Blur the image slightly to reduce artifacts
 		Imgproc.blur(inputImage, blurredImage, new Size(2, 2));
 		
 		//Convert the RGB image into an HSV image
 		Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
 		
 		//Apply a color mask to the HSV image - and colors within the range are turned white, and the rest, black
-		Core.inRange(hsvImage, lowerBounds, upperBounds, outputImage);
+		Core.inRange(hsvImage, lowerBounds, upperBounds, maskImage);
 		
-		maskImage = outputImage.clone();
+		//Store the mask in a separate variable for debugging
+		outputImage = maskImage.clone();
+		
 		//Clear the list of contours
 		contours.clear();
 		
 		//Find all image contours and store them in the contours list
-		Imgproc.findContours(outputImage, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
+		Imgproc.findContours(maskImage, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
 	}
 	
 	//This function processes the HSV mask and works out target variables
@@ -335,11 +355,6 @@ class VisionThread extends Thread
 				targetsFound++;
 				
 				targetDistance = calculateDistance(target1.boundingRect().width);
-				//average out variations of the distance over the duration
-				/*for(int a = 0; a < 10; ++a){
-					targetDistance = (targetDistance +  calculateDistance(target1.boundingRect().width)) /2;
-				}*/
-				
 			}
 			
 			//Store the second largest rectangle
@@ -365,21 +380,26 @@ class VisionThread extends Thread
 		}
 		
 		//Put the processed image into the server so that the smartdashboard can view it
-		videoOut.putFrame(maskImage);
+		videoOut.putFrame(outputImage);
 	}
 	
 	//This function returns whether a rectangle could potentially be a target
 	boolean isPossibleTarget(RotatedRect rect)
 	{
-		//TODO: Write code to filter out targets from possible noise
-		
 		return rect.size.area() > minTargetSize;
 	}
 	
+	
+	//This function calculates how far a target is from the camera
 	double calculateDistance(double targetSizeX)
 	{
+		//Convert the target's width from pixels to feet and halve that, since we're only going to be using half of the image
 		double targetWidthFt = targetSizeX * targetWidthConversion * 0.5;
-		double targetAngle = Math.atan((targetWidthFt * Math.tan(cameraFOV * 0.5 * (Math.PI / 180.0))) / cameraFOVWidth);
+		
+		//Calculate the angle that the right-most edge of the target is from the center of a line extending straight from the camera
+		double targetAngle = Math.atan((targetWidthFt * Math.tan(cameraFOV * 0.5 * (Math.PI / 180.0))) / fovPlaneDistance);
+		
+		//Scale a triangle that fits the calculated target angle and has an end length of half the width of the target
 		return (targetWidth * 0.5) / Math.tan(targetAngle);
 	}
 }
