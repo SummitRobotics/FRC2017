@@ -2,7 +2,8 @@ package org.usfirst.frc.team5468.robot;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
-import edu.wpi.first.wpilibj.TalonSRX;
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import com.ctre.CANTalon;
 
 public class RobotMap 
@@ -16,6 +17,9 @@ public class RobotMap
 	public CANTalon rrDrive;
 	public CANTalon lfDrive;
 	public CANTalon lrDrive;
+	
+	public Compressor compressor;
+	public DoubleSolenoid solenoid1;
 	
 	public ADXRS450_Gyro gyro;
 	public BuiltInAccelerometer accelerometer;
@@ -40,6 +44,9 @@ public class RobotMap
 			lrDrive.enable();
 			
 			gyro.reset();
+			
+			compressor = new Compressor(0);
+			solenoid1 = new DoubleSolenoid(0, 1);
 		}
 		catch(Exception e)
 		{

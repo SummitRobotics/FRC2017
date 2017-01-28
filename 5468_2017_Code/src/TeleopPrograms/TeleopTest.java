@@ -1,6 +1,7 @@
 package TeleopPrograms;
 import org.usfirst.frc.team5468.robot.*;
 import Templates.TeleopProgram;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import Plugins.*;
@@ -66,6 +67,14 @@ public class TeleopTest extends TeleopProgram
 			
 			mainRobot.hardwareMap.rfDrive.set(rightPower);
 			mainRobot.hardwareMap.rrDrive.set(rightPower);
+			
+			if (mainRobot.gamepad1.getRawButton(1))
+			{
+				mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kForward);
+			} else
+			{
+				mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
+			}
 			
 		}
 

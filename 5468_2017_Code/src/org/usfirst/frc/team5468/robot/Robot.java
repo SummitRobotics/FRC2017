@@ -83,6 +83,8 @@ public class Robot extends IterativeRobot
 	@Override
 	public void disabledPeriodic() 
 	{
+		hardwareMap.compressor.setClosedLoopControl(false);
+		
 		//Call the proper methods in the autonomous and teleop programs (if they exist)
 		if(auto != null)
 		{
@@ -132,6 +134,8 @@ public class Robot extends IterativeRobot
 		//Get the currently selected teleop program and attempt to find a matching program instance
 		//If a program can't be found, teleop will be null
 		teleop = programManager.getTeleopProgram(teleopChooser.getSelected());
+		
+		hardwareMap.compressor.setClosedLoopControl(true);
 		
 		//Call the proper method in the teleop program (if it exists)
 		if(teleop != null)

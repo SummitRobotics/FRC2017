@@ -1,6 +1,8 @@
 package org.usfirst.frc.team5468.robot;
 import java.util.ArrayList;
 import java.util.List;
+
+import AutonomousPrograms.prototype;
 import Templates.*;
 import TeleopPrograms.*;
 
@@ -22,7 +24,7 @@ public class ProgramManager
 		teleopPrograms = new ArrayList<>();
 		
 		//Add the robot's autonomous programs here...
-		
+		autonomousPrograms.add(new prototype(robot, "CTRLib"));
 		//Add the robot's teleop programs here...
 		teleopPrograms.add(new TeleopTest(robot, "Teleop Test"));
 		
