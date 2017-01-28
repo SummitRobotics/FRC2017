@@ -71,6 +71,11 @@ public class PID
 		DGain = dGain;
 	}
 	
+	public void setMaxOutput(double max)
+	{
+		maxOutputValue = max;
+	}
+	
 	//This function sets the sensor and target values of the PID system
 	public void setParameters (double sensor, double target)
 	{
