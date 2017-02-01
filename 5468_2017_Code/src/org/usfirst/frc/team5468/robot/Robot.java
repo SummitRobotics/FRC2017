@@ -1,5 +1,6 @@
 
 package org.usfirst.frc.team5468.robot;
+import Plugins.HallEffect;
 import Templates.*;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
@@ -32,6 +33,7 @@ public class Robot extends IterativeRobot
 	TeleopProgram teleop = null;
 	
 	public UsbCamera camera;
+	HallEffect sensor;
 	
 	/*
 	 * This function is run when the robot is first started up and should be
@@ -43,6 +45,7 @@ public class Robot extends IterativeRobot
 		//Initialize the hardware and program managers
 		hardwareMap = new RobotMap();
 		programManager = new ProgramManager(this);
+		sensor = new HallEffect(this);
 		
 		//Initialize the smart dashboard choosers for the autonomous and teleop programs
 		autoChooser = new SendableChooser<String>();
@@ -192,6 +195,7 @@ public class Robot extends IterativeRobot
 		//Put the setup program choosers onto the smart dashboard
 		SmartDashboard.putData("Autonomous Chooser", autoChooser);
 		SmartDashboard.putData("Teleop Chooser", teleopChooser);
+		sensor.demo();
 	}
 	
 	//This function sets up the instances of the joysticks
