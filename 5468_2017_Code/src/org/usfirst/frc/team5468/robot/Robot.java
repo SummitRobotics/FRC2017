@@ -166,7 +166,7 @@ public class Robot extends IterativeRobot
 	@Override
 	public void testPeriodic() 
 	{
-
+		sensor.demo();
 	}
 	
 	//Setup the program choosers for the autonomous and teleop programs
@@ -195,7 +195,6 @@ public class Robot extends IterativeRobot
 		//Put the setup program choosers onto the smart dashboard
 		SmartDashboard.putData("Autonomous Chooser", autoChooser);
 		SmartDashboard.putData("Teleop Chooser", teleopChooser);
-		sensor.demo();
 	}
 	
 	//This function sets up the instances of the joysticks
