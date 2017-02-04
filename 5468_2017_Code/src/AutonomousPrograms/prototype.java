@@ -13,7 +13,7 @@ public class prototype extends AutonomousProgram
 	//this makes the robot safer and obey rules
 	PID gyroPID;	
 	Gossamer autoThread;
-	
+	HallEffect sensor;
 	//Reference for vision
 	Vision visionProc;
 	
@@ -21,6 +21,7 @@ public class prototype extends AutonomousProgram
 	public prototype(Robot robot, String name)
 	{
 		super(robot, name);
+		sensor = new HallEffect(robot);
 	}
 
 	//overriding the abstract class
@@ -51,6 +52,7 @@ public class prototype extends AutonomousProgram
 				
 		visionProc.startVision();
 		
+		
 		//Reset the gyro's position
 		mainRobot.hardwareMap.gyro.reset();
 				
@@ -64,8 +66,7 @@ public class prototype extends AutonomousProgram
 	@Override
 	public void autonomousPeriodic() 
 	{
-		// TODO Auto-generated method stub
-		
+		sensor.demo();
 	}
 
 	//do this when the bot is disabled
@@ -89,8 +90,6 @@ public class prototype extends AutonomousProgram
 	@Override
 	public void autonomousDisabledPeriodic() 
 	{
-		// TODO Auto-generated method stub
-		
 	}
 	
 	//A cleaner format for assigning power to the R and L drive trains
@@ -129,6 +128,8 @@ class Gossamer extends Thread
 	//will follow linear format
 	public void run ()
 	{
+		forwardHallEffect(10, 60);		
+		/*
 		//Go forward for 1 second
 		forwardWithGyro(0.5, 1);
 		
@@ -146,7 +147,7 @@ class Gossamer extends Thread
 		
 		//Turn right 90 degrees
 		turnWithGyro(0.5, 90);
-		
+		*/
 		//TODO: Implement vision tracking
 	}
 	
@@ -289,5 +290,11 @@ class Gossamer extends Thread
 				Thread.sleep(10);
 			}
 		} catch (InterruptedException e) {}
+	}
+	
+	//move foward x ft
+	public void forwardHallEffect(double ft, double time){
+		int rotations = autoProgram.sensor.countsGivenFt(ft);
+		autoProgram.sensor.givenDistance(time, rotations);
 	}
 }

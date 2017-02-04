@@ -15,7 +15,7 @@ public class RobotMap
 	public final int LF_DRIVE_ID = 22;
 	public final int LR_DRIVE_ID = 23;
 	
-	public final int hallA_ID = 2;
+	public final int hallA_ID = 7;
 	public final int hallB_ID = 3;
 	
 	public CANTalon rfDrive;

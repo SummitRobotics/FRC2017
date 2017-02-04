@@ -34,7 +34,6 @@ public class Robot extends IterativeRobot
 	
 	public UsbCamera camera;
 	HallEffect sensor;
-	
 	/*
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
@@ -45,7 +44,6 @@ public class Robot extends IterativeRobot
 		//Initialize the hardware and program managers
 		hardwareMap = new RobotMap();
 		programManager = new ProgramManager(this);
-		sensor = new HallEffect(this);
 		
 		//Initialize the smart dashboard choosers for the autonomous and teleop programs
 		autoChooser = new SendableChooser<String>();
@@ -60,6 +58,7 @@ public class Robot extends IterativeRobot
 		setupJoysticks();
 		
 		camera = CameraServer.getInstance().startAutomaticCapture();
+		sensor = new HallEffect(this);
 	}
 
 	/**
@@ -127,6 +126,7 @@ public class Robot extends IterativeRobot
 		{
 			auto.autonomousPeriodic();
 		}
+
 	}
 
 	//when teleop is selected
@@ -166,7 +166,6 @@ public class Robot extends IterativeRobot
 	@Override
 	public void testPeriodic() 
 	{
-		sensor.demo();
 	}
 	
 	//Setup the program choosers for the autonomous and teleop programs
