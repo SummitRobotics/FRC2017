@@ -19,11 +19,12 @@ public class HallEffect{
 	public HallEffect(Robot x){
 		robot = x;
 		
+		
 	}
 	
 	//use for straight encoder applications
 	public int findCountA(){
-		//TODO James deal with this
+		//TODO James deal with this please
 		return 0;
 		//return robot.hardwareMap.hallA.get();
 	}
