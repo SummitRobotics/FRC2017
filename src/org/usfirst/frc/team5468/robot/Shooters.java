@@ -9,7 +9,7 @@ public class Shooters{
 	}
 	
 	double shootStart = 0;
-	final double SHOOTER_DELAY = 1.5;
+	final double SHOOTER_DELAY = 1;
 	boolean shootersEnabled = false;
 	
 	public void shooterControl(boolean shooterButton)
