@@ -18,15 +18,11 @@ public class HallEffect{
 	//call on the main robot, and thus all related objects
 	public HallEffect(Robot x){
 		robot = x;
-		
-		
 	}
 	
 	//use for straight encoder applications
 	public int findCountA(){
-		//TODO James deal with this please
-		return 0;
-		//return robot.hardwareMap.hallA.get();
+		return robot.hardwareMap.hallA.get();
 	}
 	
 	//find the counts needed to pass x distance

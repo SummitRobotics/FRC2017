@@ -3,6 +3,7 @@ package org.usfirst.frc.team5468.robot;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import com.ctre.CANTalon;
 
@@ -20,6 +21,9 @@ public class RobotMap
 	
 	public final int INTAKE_ID = 29;
 	public final int WINCH_ID = 24;
+	
+	public final int hallA_ID = 7;
+	public final int hallB_ID = 3;
 	
 	public CANTalon rfDrive;
 	public CANTalon rrDrive;
@@ -40,6 +44,8 @@ public class RobotMap
 	public ADXRS450_Gyro gyro;
 	public BuiltInAccelerometer accelerometer;
 	
+	public Counter hallA;
+	public Counter hallB;
 	//This is called when an instance of this class is created
 	public RobotMap()
 	{
@@ -71,6 +77,9 @@ public class RobotMap
 			
 			compressor = new Compressor(0);
 			solenoid1 = new DoubleSolenoid(0, 1);
+			
+			hallA = new Counter(hallA_ID);
+			hallB = new Counter(hallB_ID);
 		}
 		catch(Exception e)
 		{

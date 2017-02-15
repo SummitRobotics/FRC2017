@@ -13,7 +13,7 @@ public class prototype extends AutonomousProgram
 	//this makes the robot safer and obey rules
 	PID gyroPID;	
 	Gossamer autoThread;
-	
+	HallEffect hall;
 	//Reference for vision
 	Vision visionProc;
 	
@@ -21,6 +21,7 @@ public class prototype extends AutonomousProgram
 	public prototype(Robot robot, String name)
 	{
 		super(robot, name);
+		hall = new HallEffect(robot);
 	}
 
 	//overriding the abstract class
@@ -50,6 +51,7 @@ public class prototype extends AutonomousProgram
 						mainRobot.programPreferences.getInt("Brightness", 50));
 				
 		visionProc.startVision();
+		
 		
 		//Reset the gyro's position
 		mainRobot.hardwareMap.gyro.reset();
@@ -113,7 +115,7 @@ class Gossamer extends Thread
 	//Reference the auto class
 	prototype autoProgram;
 	
-	//The heading of the robot relavtive to its starting orientation (in degrees)
+	//The heading of the robot relative to its starting orientation (in degrees)
 	//This ensures the robot won't drift off course in-between heading specific commands
 	double currentHeading;
 
@@ -130,22 +132,24 @@ class Gossamer extends Thread
 	public void run ()
 	{
 		//Go forward for 1 second
-		forwardWithGyro(0.5, 1);
+		//forwardWithGyro(0.5, 1);
 		
 		//Turn right 90 degrees
-		turnWithGyro(.5, 90);
+		//turnWithGyro(.5, 90);
 		
 		//Go forward for 0.5 seconds
-		forwardWithGyro(0.5, 0.5);
+		//forwardWithGyro(0.5, 0.5);
 		
 		//Stop and wait for 2 seconds
 		waitForTime(2);
-		
+		autoProgram.assignPower(.3, .3);
+		autoProgram.hall.givenDistance(10, autoProgram.hall.countsGivenFt(5));
+		autoProgram.assignPower(0, 0);
 		//Go backwards for 0.25 seconds
-		forwardWithGyro(-0.5, 0.25);
+		//forwardWithGyro(-0.5, 0.25);
 		
 		//Turn right 90 degrees
-		turnWithGyro(0.5, 90);
+		//turnWithGyro(0.5, 90);
 		
 		//TODO: Implement vision tracking
 	}
