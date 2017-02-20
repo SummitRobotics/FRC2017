@@ -9,15 +9,15 @@ import Plugins.*;
 public class TeleopTest extends TeleopProgram
 {
 	public final double DRIVE_EXPONENT = 2.3;
-	
 	public double maxOutputPower = 1;
-	
+	Shooters mShooter;
 	Vision visionProc;
-	
+	HallEffect hall;
 	//This is called when an instance of this class is created
 	public TeleopTest (Robot robot, String name)
 	{
 		super (robot, name);
+		hall = new HallEffect(robot);
 	}
 
 	//Called once right when teleop starts
@@ -28,6 +28,9 @@ public class TeleopTest extends TeleopProgram
 		
 		//Create a new instance of the vision system
 		visionProc = new Vision("Vision_Test", mainRobot.camera, 320, 240, 30);
+		
+		//Create new instance of shooters
+		mShooter = new Shooters(mainRobot);
 		
 		//Get the HSV mask parameters from the robot preferences and set them in the vision system
 		visionProc.setMaskParameters(mainRobot.programPreferences.getInt("Upper Hue", 80),
@@ -44,6 +47,7 @@ public class TeleopTest extends TeleopProgram
 		
 		//Start vision processing
 		visionProc.startVision();
+		
 	}
 
 	//Called periodically during teleop
@@ -68,14 +72,26 @@ public class TeleopTest extends TeleopProgram
 			mainRobot.hardwareMap.rfDrive.set(rightPower);
 			mainRobot.hardwareMap.rrDrive.set(rightPower);
 			
-			if (mainRobot.gamepad1.getRawButton(1))
+			//Shooter control, when holding RB the shooter motor starts followed by the loader motor after a short delay
+			mShooter.shooterControl(mainRobot.gamepad1.getRawButton(6));
+			
+			//Hold X to enable intake, may change to a toggle later on
+			if (mainRobot.gamepad1.getRawButton(3))
+			{
+				mainRobot.hardwareMap.intake.set(1);
+			} else
+			{
+				mainRobot.hardwareMap.intake.set(0);
+			}
+			
+			//Hold Y to open gear holder
+			if (mainRobot.gamepad1.getRawButton(4))
 			{
 				mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kForward);
 			} else
 			{
 				mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
 			}
-			
 		}
 
 		SmartDashboard.putNumber("Rectangle Area", visionProc.getRectangleArea());
@@ -88,6 +104,7 @@ public class TeleopTest extends TeleopProgram
 		SmartDashboard.putNumber("Accelerometer x", mainRobot.hardwareMap.accelerometer.getX());
 		SmartDashboard.putNumber("Accelerometer y", mainRobot.hardwareMap.accelerometer.getY());
 		SmartDashboard.putNumber("Accelerometer z", mainRobot.hardwareMap.accelerometer.getZ());
+		hall.displayValues();
 	}
 
 	//Called once right when the robot is disabled
@@ -122,4 +139,5 @@ public class TeleopTest extends TeleopProgram
 	{
 		
 	}
+	
 }

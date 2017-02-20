@@ -1,6 +1,5 @@
 
 package org.usfirst.frc.team5468.robot;
-import Plugins.HallEffect;
 import Templates.*;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
@@ -33,7 +32,7 @@ public class Robot extends IterativeRobot
 	TeleopProgram teleop = null;
 	
 	public UsbCamera camera;
-	HallEffect sensor;
+	
 	/*
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
@@ -58,7 +57,6 @@ public class Robot extends IterativeRobot
 		setupJoysticks();
 		
 		camera = CameraServer.getInstance().startAutomaticCapture();
-		sensor = new HallEffect(this);
 	}
 
 	/**
@@ -126,7 +124,6 @@ public class Robot extends IterativeRobot
 		{
 			auto.autonomousPeriodic();
 		}
-
 	}
 
 	//when teleop is selected
@@ -166,6 +163,7 @@ public class Robot extends IterativeRobot
 	@Override
 	public void testPeriodic() 
 	{
+
 	}
 	
 	//Setup the program choosers for the autonomous and teleop programs

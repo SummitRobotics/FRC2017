@@ -13,7 +13,7 @@ public class prototype extends AutonomousProgram
 	//this makes the robot safer and obey rules
 	PID gyroPID;	
 	Gossamer autoThread;
-	HallEffect sensor;
+	HallEffect hall;
 	//Reference for vision
 	Vision visionProc;
 	
@@ -21,7 +21,7 @@ public class prototype extends AutonomousProgram
 	public prototype(Robot robot, String name)
 	{
 		super(robot, name);
-		sensor = new HallEffect(robot);
+		hall = new HallEffect(robot);
 	}
 
 	//overriding the abstract class
@@ -66,7 +66,8 @@ public class prototype extends AutonomousProgram
 	@Override
 	public void autonomousPeriodic() 
 	{
-		sensor.demo();
+		// TODO Auto-generated method stub
+		
 	}
 
 	//do this when the bot is disabled
@@ -90,6 +91,8 @@ public class prototype extends AutonomousProgram
 	@Override
 	public void autonomousDisabledPeriodic() 
 	{
+		// TODO Auto-generated method stub
+		
 	}
 	
 	//A cleaner format for assigning power to the R and L drive trains
@@ -112,7 +115,7 @@ class Gossamer extends Thread
 	//Reference the auto class
 	prototype autoProgram;
 	
-	//The heading of the robot relavtive to its starting orientation (in degrees)
+	//The heading of the robot relative to its starting orientation (in degrees)
 	//This ensures the robot won't drift off course in-between heading specific commands
 	double currentHeading;
 
@@ -128,26 +131,26 @@ class Gossamer extends Thread
 	//will follow linear format
 	public void run ()
 	{
-		forwardHallEffect(10, 60);		
-		/*
 		//Go forward for 1 second
-		forwardWithGyro(0.5, 1);
+		//forwardWithGyro(0.5, 1);
 		
 		//Turn right 90 degrees
-		turnWithGyro(.5, 90);
+		//turnWithGyro(.5, 90);
 		
 		//Go forward for 0.5 seconds
-		forwardWithGyro(0.5, 0.5);
+		//forwardWithGyro(0.5, 0.5);
 		
 		//Stop and wait for 2 seconds
 		waitForTime(2);
-		
+		autoProgram.assignPower(.3, .3);
+		autoProgram.hall.givenDistance(10, 5);
+		autoProgram.assignPower(0, 0);
 		//Go backwards for 0.25 seconds
-		forwardWithGyro(-0.5, 0.25);
+		//forwardWithGyro(-0.5, 0.25);
 		
 		//Turn right 90 degrees
-		turnWithGyro(0.5, 90);
-		*/
+		//turnWithGyro(0.5, 90);
+		
 		//TODO: Implement vision tracking
 	}
 	
@@ -290,11 +293,5 @@ class Gossamer extends Thread
 				Thread.sleep(10);
 			}
 		} catch (InterruptedException e) {}
-	}
-	
-	//move foward x ft
-	public void forwardHallEffect(double ft, double time){
-		int rotations = autoProgram.sensor.countsGivenFt(ft);
-		autoProgram.sensor.givenDistance(time, rotations);
 	}
 }
