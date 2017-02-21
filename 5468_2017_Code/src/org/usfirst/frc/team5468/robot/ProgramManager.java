@@ -25,6 +25,9 @@ public class ProgramManager
 		
 		//Add the robot's autonomous programs here...
 		autonomousPrograms.add(new prototype(robot, "CTRLib"));
+		autonomousPrograms.add(new path1(robot, "Basic Gear"));
+		autonomousPrograms.add(new path2(robot, "Advanced Gear"));
+		autonomousPrograms.add(new path3(robot, "Advanced Gear / Shoot"));
 		//Add the robot's teleop programs here...
 		teleopPrograms.add(new TeleopTest(robot, "Teleop Test"));
 		
