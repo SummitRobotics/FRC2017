@@ -31,7 +31,7 @@ public class Vision
 	
 	public String visionThreadName;
 	
-		//Framerate setting
+	//Framerate setting
 	int updateFrequency;
 	
 	//Settings for the HSV mask bounds
@@ -162,6 +162,10 @@ public class Vision
 			
 		return 0;
 	}
+	
+	public double[] getVisionShift(double power){
+		return visionThread.visionPID(power);
+	}
 }
 
 //This is the class that will be executed on a separate thread
@@ -179,6 +183,7 @@ class VisionThread extends Thread
 	final double targetWidth = 10.0 / 12.0; //The width of the target (this should be the width of the area actually seen by the camera)
 	final double targetWidthPixels = 61; //The width of the target on-screen measured at "fovPlaneDistance" away from the camera (in pixels)
 	final double targetWidthConversion = targetWidth / targetWidthPixels; //This creates a conversion to convert target width from pixels to feet
+	final double gearTargetWidth = 0;
 	
 	//References to get and put video frames
 	CvSink videoIn;
@@ -402,4 +407,41 @@ class VisionThread extends Thread
 		//Scale a triangle that fits the calculated target angle and has an end length of half the width of the target
 		return (targetWidth * 0.5) / Math.tan(targetAngle);
 	}
+	
+	//Don't delete these methods = even if you think they will spawn satan
+	//because... the ritual hasn't been completed yet.
+	//find the average distance the middle of the polygons is from the center of camera
+	
+	//how much error will be allowed
+	double tolerance = 0;
+	int findDeviation(){
+		double center;
+		if(target1.center.x > target2.center.x){
+			center = target1.center.x - target2.center.x;		
+		}
+		else{
+			center = target2.center.x - target1.center.x;
+		}
+		if(Math.abs(center) < tolerance){
+			return 0;
+		}
+		return (int) (center - (inputImage.width() / 2)) / inputImage.width();
+	}
+	
+	
+	//adjust direction of bot relative to reflective tape
+	double[] visionPID(double a){
+		double r = 1 - a;
+		int x = 0, y = 0;
+		if(findDeviation() < 0){
+			x += findDeviation() * r;
+		}
+		else{
+			y += findDeviation() * r;
+		}
+		double[] z = new double[]{x,y};
+		return z;
+	}
+	
+	
 }

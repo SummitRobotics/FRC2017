@@ -12,7 +12,7 @@ public class prototype extends AutonomousProgram
 	//the thread class enables stopping of bot mid-function.
 	//this makes the robot safer and obey rules
 	PID gyroPID;	
-	Gossamer autoThread;
+	Dave autoThread;
 	HallEffect hall;
 	//Reference for vision
 	Vision visionProc;
@@ -57,7 +57,7 @@ public class prototype extends AutonomousProgram
 		mainRobot.hardwareMap.gyro.reset();
 				
 		//Create a new auto program thread
-		autoThread = new Gossamer(this);
+		autoThread = new Dave(this);
 			
 		//Start executing the auto thread
 		autoThread.start();
@@ -106,7 +106,7 @@ public class prototype extends AutonomousProgram
 }
 
 //This thread will enable functions to run in a safe format
-class Gossamer extends Thread
+class Dave extends Thread
 {
 	final int MAX_TURN_TIME = 5000; //Maximum time the robot will attempt to turn before giving up (in milliseconds)
 	final int MAX_TURN_ERROR_WAIT = 50; //The time that the robot has be within the turn error before continuing (in milliseconds)
@@ -120,7 +120,7 @@ class Gossamer extends Thread
 	double currentHeading;
 
 	//Constructor saves an instance of auto class for reference
-	public Gossamer (prototype program)
+	public Dave (prototype program)
 	{
 		autoProgram = program;
 		
@@ -131,14 +131,13 @@ class Gossamer extends Thread
 	//will follow linear format
 	public void run ()
 	{
-		//Go forward for 1 second
-		//forwardWithGyro(0.5, 1);
+		/*forwardWithGyro(0.5, 0.5);
 		
 		//Turn right 90 degrees
-		//turnWithGyro(.5, 90);
+		turnWithGyro(0.5, 90);
 		
 		//Go forward for 0.5 seconds
-		//forwardWithGyro(0.5, 0.5);
+		forwardWithGyro(0.5, 0.5);
 		
 		//Stop and wait for 2 seconds
 		waitForTime(2);
@@ -149,9 +148,9 @@ class Gossamer extends Thread
 		//forwardWithGyro(-0.5, 0.25);
 		
 		//Turn right 90 degrees
-		//turnWithGyro(0.5, 90);
+		//turnWithGyro(0.5, 90);\
 		
-		//TODO: Implement vision tracking
+		//TODO: Implement vision tracking */
 	}
 	
 	

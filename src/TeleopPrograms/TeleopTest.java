@@ -3,6 +3,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.usfirst.frc.team5468.robot.*;
 import Templates.TeleopProgram;
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -51,6 +52,8 @@ public class TeleopTest extends TeleopProgram
 		
 		//Start vision processing
 		visionProc.startVision();
+		
+		mainRobot.hardwareMap.compressor.setClosedLoopControl(true);
 	}
 
 	//Called periodically during teleop
@@ -107,6 +110,8 @@ public class TeleopTest extends TeleopProgram
 		SmartDashboard.putNumber("Accelerometer x", mainRobot.hardwareMap.accelerometer.getX());
 		SmartDashboard.putNumber("Accelerometer y", mainRobot.hardwareMap.accelerometer.getY());
 		SmartDashboard.putNumber("Accelerometer z", mainRobot.hardwareMap.accelerometer.getZ());
+		SmartDashboard.putBoolean("Pressure Switch Value", mainRobot.hardwareMap.compressor.getPressureSwitchValue());
+		SmartDashboard.putBoolean("Compressor", mainRobot.hardwareMap.compressor.getClosedLoopControl());
 	}
 
 	//Called once right when the robot is disabled
@@ -114,7 +119,7 @@ public class TeleopTest extends TeleopProgram
 	public void teleopDisabledInit() 
 	{
 		// TODO Auto-generated method stub
-		mainRobot.hardwareMap.lfDrive.set(0);
+		mainRobot.hardwareMap.lfDrive.set(0); 
 		mainRobot.hardwareMap.lrDrive.set(0);
 		
 		mainRobot.hardwareMap.rfDrive.set(0);
@@ -127,6 +132,8 @@ public class TeleopTest extends TeleopProgram
 		
 		//Stop the vision system
 		visionProc.stopVision();
+		
+		mainRobot.hardwareMap.compressor.setClosedLoopControl(false);
 	}
 
 	//Called periodically while the robot is disabled
