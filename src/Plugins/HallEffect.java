@@ -1,9 +1,6 @@
 package Plugins;
 
 import org.usfirst.frc.team5468.robot.*;
-
-import edu.wpi.first.wpilibj.Counter;
-import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class HallEffect{

@@ -9,6 +9,19 @@ import com.ctre.CANTalon;
 
 public class RobotMap 
 {
+	//Controller Variables
+	public final int A_Button = 1;
+    public final int B_Button = 2;
+    public final int X_Button = 3;
+    public final int Y_Button = 4;
+    public final int LB_Button = 5;
+    public final int RB_Button = 6;
+    public final int Back_Button = 7;
+    public final int Start_Button = 8;
+    public final int LS_Button = 9;
+    public final int RS_Button = 10;
+
+	//TALON Ports
 	public final int RF_DRIVE_ID = 26;
 	public final int RR_DRIVE_ID = 25;
 	public final int LF_DRIVE_ID = 21;
@@ -22,9 +35,11 @@ public class RobotMap
 	public final int INTAKE_ID = 29;
 	public final int WINCH_ID = 24;
 	
+	//Sensor Ports
 	public final int hallA_ID = 7;
 	public final int hallB_ID = 3;
 	
+	//TALON Hardware References
 	public CANTalon rfDrive;
 	public CANTalon rrDrive;
 	public CANTalon lfDrive;
@@ -38,14 +53,27 @@ public class RobotMap
 	public CANTalon intake;
 	public CANTalon winch;
 	
+	//Pneumatic Hardware References
 	public Compressor compressor;
 	public DoubleSolenoid solenoid1;
 	
+	//Sensor Hardware References
 	public ADXRS450_Gyro gyro;
 	public BuiltInAccelerometer accelerometer;
 	
 	public Counter hallA;
 	public Counter hallB;
+	
+	//Winch & Intake Settings 
+    public final double winchPower = 0; //Motor not currently connected, change to 1 once attached
+	public final double intakePower = 1;
+	
+	//Shooter Settings
+	public final double shooterPower = 0.80;
+	public final double loaderPower = 1; //Controls blenders as well
+	public final double shooterDelay = 1.75; //Delay between shooter motor spin up and loader/blender motor activation
+	
+	
 	//This is called when an instance of this class is created
 	public RobotMap()
 	{

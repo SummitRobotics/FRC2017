@@ -1,9 +1,6 @@
 package TeleopPrograms;
-import java.util.concurrent.TimeUnit;
-
 import org.usfirst.frc.team5468.robot.*;
 import Templates.TeleopProgram;
-import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -13,6 +10,7 @@ public class TeleopTest extends TeleopProgram
 {
 	public final double DRIVE_EXPONENT = 2.3;
 	
+	//Max drive power can be adjusted through SmartDashboard
 	public double maxOutputPower = 1;
 	
 	Shooters mShooter;
@@ -79,24 +77,33 @@ public class TeleopTest extends TeleopProgram
 			mainRobot.hardwareMap.rrDrive.set(rightPower);
 			
 			//Shooter control, when holding RB the shooter motor starts followed by the loader motor after a short delay
-			mShooter.shooterControl(mainRobot.gamepad1.getRawButton(6));
+			mShooter.shooterControl(mainRobot.gamepad1.getRawButton(mainRobot.hardwareMap.RB_Button));
 			
 			//Hold X to enable intake, may change to a toggle later on
-			if (mainRobot.gamepad1.getRawButton(3))
+			if (mainRobot.gamepad1.getRawButton(mainRobot.hardwareMap.X_Button))
 			{
-				mainRobot.hardwareMap.intake.set(1);
+				mainRobot.hardwareMap.intake.set(mainRobot.hardwareMap.intakePower);
 			} else
 			{
 				mainRobot.hardwareMap.intake.set(0);
 			}
 			
 			//Hold Y to open gear holder
-			if (mainRobot.gamepad1.getRawButton(4))
+			if (mainRobot.gamepad1.getRawButton(mainRobot.hardwareMap.Y_Button))
 			{
 				mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kForward);
 			} else
 			{
 				mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
+			}
+			
+			//Hold LB to activate winch
+			if (mainRobot.gamepad1.getRawButton(mainRobot.hardwareMap.LB_Button))
+			{
+				mainRobot.hardwareMap.winch.set(mainRobot.hardwareMap.winchPower);
+			} else
+			{
+				mainRobot.hardwareMap.winch.set(0);
 			}
 		}
 

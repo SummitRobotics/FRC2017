@@ -1,8 +1,6 @@
 package AutonomousPrograms;
 import org.usfirst.frc.team5468.robot.Robot;
-
 import Templates.*;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import Plugins.*;
 
 //extends our abstract class
