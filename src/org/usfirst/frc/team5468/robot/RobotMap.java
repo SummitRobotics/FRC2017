@@ -9,6 +9,9 @@ import com.ctre.CANTalon;
 
 public class RobotMap 
 {
+	public final double distanceA = 3;
+	public final double distanceB = 2;
+	public final double distanceC = 1;
 	public final int RF_DRIVE_ID = 26;
 	public final int RR_DRIVE_ID = 25;
 	public final int LF_DRIVE_ID = 21;
