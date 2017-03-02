@@ -59,9 +59,15 @@ public class gearShootRedCenter extends AutonomousProgram
 				
 		//Create a new auto program thread
 		autoThread = new gear1(this);
+		
+		mainRobot.hardwareMap.lfDrive.enable();
+		mainRobot.hardwareMap.lrDrive.enable();
+		mainRobot.hardwareMap.rfDrive.enable();
+		mainRobot.hardwareMap.rrDrive.enable();
 			
 		//Start executing the auto thread
 		autoThread.start();
+		
 	}
 
 	@Override
