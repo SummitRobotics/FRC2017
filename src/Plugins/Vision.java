@@ -7,6 +7,7 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.RotatedRect;
 import org.opencv.imgproc.Imgproc;
+import org.usfirst.frc.team5468.robot.Robot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,20 @@ public class Vision
 {
 	//This will hold an instance of the camera being used for vision
 	public UsbCamera camera;
+	
+	
+	PID pid;
+	
+	public double pV = 1;
+	public double iV = 3;
+	public double dV = 0.2;
+	
+	double pidResultX = 0;
+	double pidResultY = 0;
+	
+	//Center cordinates of ideal position
+	public double iX;
+	public double iY;
 	
 	//Cache the width and height of the image
 	public int imgWidth, imgHeight;
@@ -53,6 +68,10 @@ public class Vision
 		imgWidth = width;
 		imgHeight = height;
 		updateFrequency = updateFramerate;
+		
+		
+		pid = new PID(pV,iV,dV);
+		
 	}
 	
 	//This function starts the vision thread
@@ -165,6 +184,32 @@ public class Vision
 	
 	public double[] getVisionShift(double power){
 		return visionThread.visionPID(power);
+	}
+	
+	public void setPidValues(double p, double i, double d)
+	{
+		pV = p;
+		iV = i;
+		dV = d;
+		pid = new PID(pV,iV,dV);
+	}
+	
+	public double[] pidVisionAim()
+	{
+		double tX = getTargetScreenX();
+		double tY = getTargetScreenX();
+		
+		pid.setGains(pV, iV, dV);
+		
+		//Calculate X Error
+		pid.setParameters(tX, iX);
+		pidResultX = pid.calculateOutput();
+		
+		//Calculate Y Error
+		pid.setParameters(tY, iY);
+		pidResultY = pid.calculateOutput();
+		
+		return new double[] {pidResultX, pidResultY};
 	}
 }
 

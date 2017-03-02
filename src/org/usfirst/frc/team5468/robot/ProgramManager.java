@@ -1,9 +1,7 @@
 package org.usfirst.frc.team5468.robot;
 import java.util.ArrayList;
 import java.util.List;
-
-import AutonomousPrograms.circleAuto;
-import AutonomousPrograms.prototype;
+import AutonomousPrograms.*;
 import Templates.*;
 import TeleopPrograms.*;
 
@@ -25,8 +23,14 @@ public class ProgramManager
 		teleopPrograms = new ArrayList<>();
 		
 		//Add the robot's autonomous programs here...
-		autonomousPrograms.add(new prototype(robot, "CTRLib"));
-		autonomousPrograms.add(new circleAuto(robot, "Circles Breh"));
+		autonomousPrograms.add(new prototype(robot, "Cullen's Prototype"));
+		autonomousPrograms.add(new gearShootBlueCenter(robot, "gearShootBlueCenter"));
+		autonomousPrograms.add(new gearShootRedCenter(robot, "gearShootRedCenter"));
+		autonomousPrograms.add(new hopperShootBlueCenter(robot, "hopperShootBlueCenter"));
+		autonomousPrograms.add(new hopperShootRedCenter(robot, "hopperShootRedCenter"));
+		autonomousPrograms.add(new hopperShootBlueSide(robot, "hopperShootBlueSide"));
+		autonomousPrograms.add(new hopperShootRedSide(robot, "hopperShootRedSide"));
+		
 		//Add the robot's teleop programs here...
 		teleopPrograms.add(new TeleopTest(robot, "Teleop Test"));
 		

@@ -2,23 +2,24 @@ package AutonomousPrograms;
 import org.usfirst.frc.team5468.robot.Robot;
 
 import Templates.*;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import Plugins.*;
 
 //extends our abstract class
-public class prototype extends AutonomousProgram 
+public class hopperShootBlueCenter extends AutonomousProgram 
 {
 	//reference gyro and thread for auto functions
 	//the thread class enables stopping of bot mid-function.
 	//this makes the robot safer and obey rules
 	PID gyroPID;	
-	Dave autoThread;
+	HSBC autoThread;
 	HallEffect hall;
 	//Reference for vision
 	Vision visionProc;
 	
 	//constructor
-	public prototype(Robot robot, String name)
+	public hopperShootBlueCenter(Robot robot, String name)
 	{
 		super(robot, name);
 		hall = new HallEffect(robot);
@@ -57,7 +58,7 @@ public class prototype extends AutonomousProgram
 		mainRobot.hardwareMap.gyro.reset();
 				
 		//Create a new auto program thread
-		autoThread = new Dave(this);
+		autoThread = new HSBC(this);
 			
 		//Start executing the auto thread
 		autoThread.start();
@@ -106,21 +107,21 @@ public class prototype extends AutonomousProgram
 }
 
 //This thread will enable functions to run in a safe format
-class Dave extends Thread
+class HSBC extends Thread
 {
 	final int MAX_TURN_TIME = 5000; //Maximum time the robot will attempt to turn before giving up (in milliseconds)
 	final int MAX_TURN_ERROR_WAIT = 50; //The time that the robot has be within the turn error before continuing (in milliseconds)
 	final double TURN_ERROR = 1; //The range of acceptable error when turning (in degrees)
 	
 	//Reference the auto class
-	prototype autoProgram;
+	hopperShootBlueCenter autoProgram;
 	
 	//The heading of the robot relative to its starting orientation (in degrees)
 	//This ensures the robot won't drift off course in-between heading specific commands
 	double currentHeading;
 
 	//Constructor saves an instance of auto class for reference
-	public Dave (prototype program)
+	public HSBC (hopperShootBlueCenter program)
 	{
 		autoProgram = program;
 		
@@ -131,24 +132,21 @@ class Dave extends Thread
 	//will follow linear format
 	public void run ()
 	{
-		forwardWithGyro(0.5, 0.5);
+		//Forward to gear
+		forwardWithGyro(0.5, 1.25);
+		forwardWithGyro(0.1, .25);
+		autoProgram.mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kForward);
+		forwardWithGyro(0.01, 0.5);
+		
+		//Back away from gear
+		forwardWithGyro(-0.5, 0.75);
+		autoProgram.mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
 		
 		//Turn right 90 degrees
 		turnWithGyro(0.5, 90);
 		
 		//Go forward for 0.5 seconds
-		forwardWithGyro(0.5, 0.5);
-		
-		//Stop and wait for 2 seconds
-		waitForTime(2);
-		//autoProgram.assignPower(.3, .3);
-		//autoProgram.hall.givenDistance(10, autoProgram.hall.countsGivenFt(5));
-		//autoProgram.assignPower(0, 0);
-		//Go backwards for 0.25 seconds
-		forwardWithGyro(-0.5, 0.25);
-		
-		//Turn right 90 degrees
-		turnWithGyro(0.5, 90);
+		forwardWithGyro(0.5, 0.65);
 		
 		//TODO: Implement vision tracking
 	}

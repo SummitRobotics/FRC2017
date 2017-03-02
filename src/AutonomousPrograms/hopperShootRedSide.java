@@ -6,19 +6,19 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import Plugins.*;
 
 //extends our abstract class
-public class prototype extends AutonomousProgram 
+public class hopperShootRedSide extends AutonomousProgram 
 {
 	//reference gyro and thread for auto functions
 	//the thread class enables stopping of bot mid-function.
 	//this makes the robot safer and obey rules
 	PID gyroPID;	
-	Dave autoThread;
+	HSRS autoThread;
 	HallEffect hall;
 	//Reference for vision
 	Vision visionProc;
 	
 	//constructor
-	public prototype(Robot robot, String name)
+	public hopperShootRedSide(Robot robot, String name)
 	{
 		super(robot, name);
 		hall = new HallEffect(robot);
@@ -57,7 +57,7 @@ public class prototype extends AutonomousProgram
 		mainRobot.hardwareMap.gyro.reset();
 				
 		//Create a new auto program thread
-		autoThread = new Dave(this);
+		autoThread = new HSRS(this);
 			
 		//Start executing the auto thread
 		autoThread.start();
@@ -106,21 +106,21 @@ public class prototype extends AutonomousProgram
 }
 
 //This thread will enable functions to run in a safe format
-class Dave extends Thread
+class HSRS extends Thread
 {
 	final int MAX_TURN_TIME = 5000; //Maximum time the robot will attempt to turn before giving up (in milliseconds)
 	final int MAX_TURN_ERROR_WAIT = 50; //The time that the robot has be within the turn error before continuing (in milliseconds)
 	final double TURN_ERROR = 1; //The range of acceptable error when turning (in degrees)
 	
 	//Reference the auto class
-	prototype autoProgram;
+	hopperShootRedSide autoProgram;
 	
 	//The heading of the robot relative to its starting orientation (in degrees)
 	//This ensures the robot won't drift off course in-between heading specific commands
 	double currentHeading;
 
 	//Constructor saves an instance of auto class for reference
-	public Dave (prototype program)
+	public HSRS (hopperShootRedSide program)
 	{
 		autoProgram = program;
 		
@@ -131,26 +131,38 @@ class Dave extends Thread
 	//will follow linear format
 	public void run ()
 	{
-		forwardWithGyro(0.5, 0.5);
+		//RED
+		//Drive forward to blue hopper
+		forwardWithGyro(0.5, 1);
 		
-		//Turn right 90 degrees
+		//Turn right to hopper
 		turnWithGyro(0.5, 90);
 		
-		//Go forward for 0.5 seconds
-		forwardWithGyro(0.5, 0.5);
+		//Drive to hopper
+		forwardWithGyro(0.5, 0.3);
 		
-		//Stop and wait for 2 seconds
+		//Wait for a second
 		waitForTime(2);
-		//autoProgram.assignPower(.3, .3);
-		//autoProgram.hall.givenDistance(10, autoProgram.hall.countsGivenFt(5));
-		//autoProgram.assignPower(0, 0);
-		//Go backwards for 0.25 seconds
-		forwardWithGyro(-0.5, 0.25);
 		
-		//Turn right 90 degrees
-		turnWithGyro(0.5, 90);
+		//Back away from hopper
+		forwardWithGyro(-0.5, 0.3);
+		autoProgram.mainRobot.hardwareMap.rShooter.set(-autoProgram.mainRobot.hardwareMap.shootPower);
+		autoProgram.mainRobot.hardwareMap.lShooter.set(autoProgram.mainRobot.hardwareMap.shootPower);
 		
-		//TODO: Implement vision tracking
+		autoProgram.mainRobot.hardwareMap.intake.set(1);
+		
+		//Turn right to boiler.
+		turnWithGyro(0.5, 75);
+		
+		//Drive forward towards boiler
+		forwardWithGyro(0.5, 0.3);
+		
+		//Wait
+		waitForTime(0.5);
+		
+		//Turn on loaders and blenders
+		autoProgram.mainRobot.hardwareMap.rLoader.set(autoProgram.mainRobot.hardwareMap.loaderPower);
+		autoProgram.mainRobot.hardwareMap.lLoader.set(-autoProgram.mainRobot.hardwareMap.loaderPower);
 	}
 	
 	

@@ -2,23 +2,24 @@ package AutonomousPrograms;
 import org.usfirst.frc.team5468.robot.Robot;
 
 import Templates.*;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import Plugins.*;
 
 //extends our abstract class
-public class pathA extends AutonomousProgram 
+public class gearShootBlueCenter extends AutonomousProgram 
 {
 	//reference gyro and thread for auto functions
 	//the thread class enables stopping of bot mid-function.
 	//this makes the robot safer and obey rules
 	PID gyroPID;	
-	GossamerA autoThread;
+	GSBC autoThread;
 	HallEffect hall;
 	//Reference for vision
 	Vision visionProc;
 	
 	//constructor
-	public pathA(Robot robot, String name)
+	public gearShootBlueCenter(Robot robot, String name)
 	{
 		super(robot, name);
 		hall = new HallEffect(robot);
@@ -57,8 +58,13 @@ public class pathA extends AutonomousProgram
 		mainRobot.hardwareMap.gyro.reset();
 				
 		//Create a new auto program thread
-		autoThread = new GossamerA(this);
+		autoThread = new GSBC(this);
 			
+		mainRobot.hardwareMap.lfDrive.enable();
+		mainRobot.hardwareMap.lrDrive.enable();
+		mainRobot.hardwareMap.rfDrive.enable();
+		mainRobot.hardwareMap.rrDrive.enable();
+		
 		//Start executing the auto thread
 		autoThread.start();
 	}
@@ -106,21 +112,21 @@ public class pathA extends AutonomousProgram
 }
 
 //This thread will enable functions to run in a safe format
-class GossamerA extends Thread
+class GSBC extends Thread
 {
 	final int MAX_TURN_TIME = 5000; //Maximum time the robot will attempt to turn before giving up (in milliseconds)
 	final int MAX_TURN_ERROR_WAIT = 50; //The time that the robot has be within the turn error before continuing (in milliseconds)
 	final double TURN_ERROR = 1; //The range of acceptable error when turning (in degrees)
 	
 	//Reference the auto class
-	pathA autoProgram;
+	gearShootBlueCenter autoProgram;
 	
 	//The heading of the robot relative to its starting orientation (in degrees)
 	//This ensures the robot won't drift off course in-between heading specific commands
 	double currentHeading;
 
 	//Constructor saves an instance of auto class for reference
-	public GossamerA (pathA program)
+	public GSBC (gearShootBlueCenter program)
 	{
 		autoProgram = program;
 		
@@ -131,9 +137,33 @@ class GossamerA extends Thread
 	//will follow linear format
 	public void run ()
 	{
-		autoProgram.assignPower(.3, .3);
-		autoProgram.hall.givenDistance(10, autoProgram.hall.countsGivenFt(5));
-		forwardWithVision(.3, .3);
+		//BLUE
+		//Forward to gear
+		forwardWithGyro(0.5, 1.25);
+		forwardWithGyro(0.1, 0.5);
+		autoProgram.mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kForward);
+		waitForTime(0.75);
+		
+		//Back away from gear
+		forwardWithGyro(-0.5, 0.75);
+		autoProgram.mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
+		autoProgram.mainRobot.hardwareMap.rShooter.set(-autoProgram.mainRobot.hardwareMap.shootPower);
+		autoProgram.mainRobot.hardwareMap.lShooter.set(autoProgram.mainRobot.hardwareMap.shootPower);
+		autoProgram.mainRobot.hardwareMap.intake.set(1);
+		
+		//Turn left 90 degrees
+		turnWithGyro(0.5, -90);
+		
+		//Go forward for 0.5 seconds
+		forwardWithGyro(0.5, 2.0);
+		
+		//Turn left 45 degrees
+		turnWithGyro(0.4, -45);
+		waitForTime(0.3);
+		
+		//Turn on loaders and blenders
+		autoProgram.mainRobot.hardwareMap.rLoader.set(autoProgram.mainRobot.hardwareMap.loaderPower);
+		autoProgram.mainRobot.hardwareMap.lLoader.set(-autoProgram.mainRobot.hardwareMap.loaderPower);
 	}
 	
 	
@@ -196,27 +226,6 @@ class GossamerA extends Thread
 		//stop motors
 		autoProgram.assignPower(0,0);
 	}
-	
-	public void forwardWithVision(double power, double time){
-		long startTime = System.currentTimeMillis();
-		try
-		{
-			//Loop until enough time has passed or this thread has been interrupted
-			while(System.currentTimeMillis() - startTime < time*1000 && !Thread.interrupted())
-			{
-				double[] x = autoProgram.visionProc.getVisionShift(power);
-				autoProgram.assignPower(power + x[0], power + x[1]);
-				if(x[0] ==  0 & x[1] == 0){
-					time  = 0;
-					autoProgram.assignPower(0, 0);
-				}
-				Thread.sleep(1);
-			}
-		} catch (InterruptedException e) {}
-		//stop motors
-		autoProgram.assignPower(0,0);
-	}
-	
 	
 	//Turn and angle using the gyro, positive theta is for right turns
 	public void turnWithGyro(double power, double theta)

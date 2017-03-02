@@ -28,6 +28,9 @@ public class RobotMap
 	public final int hallA_ID = 7;
 	public final int hallB_ID = 3;
 	
+	public final double shootPower = 0.80;
+	public final double loaderPower = 0.80;
+	
 	public CANTalon rfDrive;
 	public CANTalon rrDrive;
 	public CANTalon lfDrive;

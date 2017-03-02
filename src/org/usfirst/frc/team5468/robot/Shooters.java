@@ -31,17 +31,15 @@ public class Shooters{
 			break;
 			
 		case 2:
-			mRobot.hardwareMap.rShooter.set(-0.80);
-			mRobot.hardwareMap.lShooter.set(0.80);
+			mRobot.hardwareMap.rShooter.set(-mRobot.hardwareMap.shootPower);
+			mRobot.hardwareMap.lShooter.set(mRobot.hardwareMap.shootPower);
 			if(System.currentTimeMillis() - shootStart > SHOOTER_DELAY * 1000){nextState = 3;}
 			if(!shooterButton){nextState = 1;}
 			break;
 			
 		case 3:
-			mRobot.hardwareMap.rShooter.set(-0.80);
-			mRobot.hardwareMap.lShooter.set(0.80);
-			mRobot.hardwareMap.rLoader.set(1);
-			mRobot.hardwareMap.lLoader.set(-1);
+			mRobot.hardwareMap.rLoader.set(mRobot.hardwareMap.loaderPower);
+			mRobot.hardwareMap.lLoader.set(-mRobot.hardwareMap.loaderPower);
 			if(!shooterButton){nextState = 1;}
 			break;
 		}

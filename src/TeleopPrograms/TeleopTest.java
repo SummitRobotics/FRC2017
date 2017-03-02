@@ -1,9 +1,7 @@
 package TeleopPrograms;
-import java.util.concurrent.TimeUnit;
 
 import org.usfirst.frc.team5468.robot.*;
 import Templates.TeleopProgram;
-import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -18,6 +16,17 @@ public class TeleopTest extends TeleopProgram
 	Shooters mShooter;
 	
 	Vision visionProc;
+	
+	double leftPower = 0;
+	double rightPower = 0;
+	
+	double pX;
+	double pY;
+	
+	int xDeadzone = 2;
+	int yDeadzone = 3;
+	
+	boolean targetMode = false;
 	
 	//This is called when an instance of this class is created
 	public TeleopTest (Robot robot, String name)
@@ -53,7 +62,18 @@ public class TeleopTest extends TeleopProgram
 		//Start vision processing
 		visionProc.startVision();
 		
+		xDeadzone = mainRobot.programPreferences.getInt("X Deadzone", 2);
+		yDeadzone = mainRobot.programPreferences.getInt("Y Deadzone", 3); 
+		
+		visionProc.iX = mainRobot.programPreferences.getInt("Target position X cordinate", visionProc.imgWidth / 2);
+		visionProc.iY = mainRobot.programPreferences.getInt("Target position Y cordinate", visionProc.imgHeight / 2);
+		
 		mainRobot.hardwareMap.compressor.setClosedLoopControl(true);
+		
+		mainRobot.hardwareMap.lfDrive.enable();
+		mainRobot.hardwareMap.lrDrive.enable();
+		mainRobot.hardwareMap.rfDrive.enable();
+		mainRobot.hardwareMap.rrDrive.enable();
 	}
 
 	//Called periodically during teleop
@@ -69,8 +89,13 @@ public class TeleopTest extends TeleopProgram
 			double forwardsPower = GeneralFunctions.toExponential(GeneralFunctions.deadzone(mainRobot.gamepad1.getThrottle() - mainRobot.gamepad1.getZ(), 0.2), DRIVE_EXPONENT);
 			double turningPower = GeneralFunctions.toExponential(GeneralFunctions.deadzone(mainRobot.gamepad1.getX(Hand.kLeft), 0.2), DRIVE_EXPONENT);
 			
-			double leftPower = GeneralFunctions.clamp(forwardsPower+turningPower, -1, 1);
-			double rightPower = -GeneralFunctions.clamp(forwardsPower-turningPower, -1, 1);
+			leftPower = forwardsPower + turningPower;
+			rightPower = forwardsPower - turningPower;
+			
+			visionAlign();
+			
+			leftPower = GeneralFunctions.clamp(leftPower, -1, 1);
+			rightPower = -GeneralFunctions.clamp(rightPower, -1, 1);
 			
 			mainRobot.hardwareMap.lfDrive.set(leftPower);
 			mainRobot.hardwareMap.lrDrive.set(leftPower);
@@ -98,6 +123,19 @@ public class TeleopTest extends TeleopProgram
 			{
 				mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
 			}
+			
+			//Use right joystick for winch
+			double winchPower = GeneralFunctions.toExponential(GeneralFunctions.deadzone(mainRobot.gamepad1.getY(Hand.kLeft), 0.2), DRIVE_EXPONENT);
+			mainRobot.hardwareMap.winch.set(winchPower);
+			
+			//Hold left bumper to camera aim
+			if (mainRobot.gamepad1.getRawButton(5))
+			{
+				targetMode = true;
+			} else
+			{
+				targetMode = false;
+			}
 		}
 
 		SmartDashboard.putNumber("Rectangle Area", visionProc.getRectangleArea());
@@ -110,8 +148,12 @@ public class TeleopTest extends TeleopProgram
 		SmartDashboard.putNumber("Accelerometer x", mainRobot.hardwareMap.accelerometer.getX());
 		SmartDashboard.putNumber("Accelerometer y", mainRobot.hardwareMap.accelerometer.getY());
 		SmartDashboard.putNumber("Accelerometer z", mainRobot.hardwareMap.accelerometer.getZ());
+		SmartDashboard.putNumber("PID X Error", pX);
+		SmartDashboard.putNumber("PID Y Error", pY);
 		SmartDashboard.putBoolean("Pressure Switch Value", mainRobot.hardwareMap.compressor.getPressureSwitchValue());
 		SmartDashboard.putBoolean("Compressor", mainRobot.hardwareMap.compressor.getClosedLoopControl());
+		SmartDashboard.putBoolean("Target Mode Value", targetMode);
+		
 	}
 
 	//Called once right when the robot is disabled
@@ -147,5 +189,24 @@ public class TeleopTest extends TeleopProgram
 	public void getProgramPreferences()
 	{
 		
+	}
+	
+	public void visionAlign()
+	{
+		visionProc.setPidValues(1, 3, 0.2);
+		visionProc.pidVisionAim();
+		double[] pidValues = visionProc.pidVisionAim();
+		pX = pidValues[0];
+		pY = pidValues[1];
+		if(targetMode)
+		{
+			leftPower += pX;
+			rightPower -= pX;
+		}
+		if (targetMode && pX < xDeadzone)
+		{
+			leftPower += pY;
+			rightPower += pY;
+		}
 	}
 }
