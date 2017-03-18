@@ -1,4 +1,4 @@
-package Plugins;
+		package Plugins;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
@@ -123,7 +123,7 @@ public class Vision
 	//This function sets the camera's exposure and white balance
 	public void setCameraParameters(int exposure, int whiteBalance, int brightness)
 	{
-		camera.setExposureManual(exposure);
+		camera.setExposureAuto();
 		camera.setBrightness(brightness);
 		camera.setWhiteBalanceManual(whiteBalance);
 	}
@@ -211,6 +211,8 @@ public class Vision
 		
 		return new double[] {pidResultX, pidResultY};
 	}
+	
+	
 }
 
 //This is the class that will be executed on a separate thread
@@ -475,7 +477,7 @@ class VisionThread extends Thread
 	
 	
 	//adjust direction of bot relative to reflective tape
-	double[] visionPID(double a){
+	public double[] visionPID(double a){
 		double r = 1 - a;
 		int x = 0, y = 0;
 		if(findDeviation() < 0){

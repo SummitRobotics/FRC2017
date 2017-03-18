@@ -139,15 +139,16 @@ class gear2 extends Thread
 	{
 		//BLUE
 		//Drive forward to blue hopper
-		forwardWithGyro(0.5, 1.5);
+		forwardWithGyro(0.5, 1.25);
 		
 		//Turn left to hopper
-		turnWithGyro(0.5, -90);
+		turnWithGyro(0.8, -86);
 		
 		//Drive to hopper
-		forwardWithGyro(0.5, 0.3);
+		forwardWithGyro(0.5, 0.35);
+		forwardWithGyro(0.2, 1.5);
 		
-		//Wait for a second
+		//Wait for 3 seconds
 		waitForTime(2);
 		
 		//Back away from hopper
@@ -158,10 +159,10 @@ class gear2 extends Thread
 		autoProgram.mainRobot.hardwareMap.intake.set(1);
 		
 		//Turn to boiler.
-		turnWithGyro(0.5, -65);
+		turnWithGyro(0.8, -65);
 		
 		//Drive forward towards boiler
-		forwardWithGyro(0.5, 0.3);
+		forwardWithGyro(0.5, 0.45);
 		
 		//Wait
 		waitForTime(0.5);

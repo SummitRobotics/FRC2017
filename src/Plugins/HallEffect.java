@@ -22,7 +22,7 @@ public class HallEffect{
 	
 	//use for straight encoder applications
 	public int findCountA(){
-		return robot.hardwareMap.hallA.get();
+		return robot.hardwareMap.hallSR.get();
 	}
 	
 	//find the counts needed to pass x distance

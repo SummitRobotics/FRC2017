@@ -142,23 +142,27 @@ class GSBC extends Thread
 		forwardWithGyro(0.5, 1.25);
 		forwardWithGyro(0.1, 0.5);
 		autoProgram.mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kForward);
-		waitForTime(0.75);
+		waitForTime(0.5);
+		
+		//Pushing gear further on
+		forwardWithGyro(0.3, -0.75);
+		autoProgram.mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
+		forwardWithGyro(0.3, 1);
 		
 		//Back away from gear
-		forwardWithGyro(-0.5, 0.75);
-		autoProgram.mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
+		forwardWithGyro(-0.5, 0.65);
 		autoProgram.mainRobot.hardwareMap.rShooter.set(-autoProgram.mainRobot.hardwareMap.shootPower);
 		autoProgram.mainRobot.hardwareMap.lShooter.set(autoProgram.mainRobot.hardwareMap.shootPower);
 		autoProgram.mainRobot.hardwareMap.intake.set(1);
 		
 		//Turn left 90 degrees
-		turnWithGyro(0.5, -90);
+		turnWithGyro(0.8, -90);
 		
 		//Go forward for 0.5 seconds
 		forwardWithGyro(0.5, 2.0);
 		
 		//Turn left 45 degrees
-		turnWithGyro(0.4, -45);
+		turnWithGyro(0.8, -45);
 		waitForTime(0.3);
 		
 		//Turn on loaders and blenders

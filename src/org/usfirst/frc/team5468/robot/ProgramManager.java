@@ -30,6 +30,9 @@ public class ProgramManager
 		autonomousPrograms.add(new hopperShootRedCenter(robot, "hopperShootRedCenter"));
 		autonomousPrograms.add(new hopperShootBlueSide(robot, "hopperShootBlueSide"));
 		autonomousPrograms.add(new hopperShootRedSide(robot, "hopperShootRedSide"));
+		autonomousPrograms.add(new straightForward(robot, "straightForward"));
+		autonomousPrograms.add(new gearStraightBlueCenter(robot, "gearStraightBlueCenter"));
+		autonomousPrograms.add(new gearStraightRedCenter(robot, "gearStraightRedCenter"));
 		
 		//Add the robot's teleop programs here...
 		teleopPrograms.add(new TeleopTest(robot, "Teleop Test"));

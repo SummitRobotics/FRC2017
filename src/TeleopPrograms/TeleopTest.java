@@ -20,18 +20,30 @@ public class TeleopTest extends TeleopProgram
 	double leftPower = 0;
 	double rightPower = 0;
 	
+	boolean intakeToggle = false;
+	boolean gearBusy = false;
+	
 	double pX;
 	double pY;
+	
+	double currentHeading;
 	
 	int xDeadzone = 2;
 	int yDeadzone = 3;
 	
+	double[] pidValues;
+	
 	boolean targetMode = false;
+	
+	PID gyroPID;
+
 	
 	//This is called when an instance of this class is created
 	public TeleopTest (Robot robot, String name)
 	{
 		super (robot, name);
+		
+		currentHeading = 0;
 	}
 
 	//Called once right when teleop starts
@@ -55,7 +67,7 @@ public class TeleopTest extends TeleopProgram
 				mainRobot.programPreferences.getInt("Lower Val", 120));
 		
 		//Get camera settings from the robot preferences and set them
-		visionProc.setCameraParameters(mainRobot.programPreferences.getInt("Exposure", 1), 
+		visionProc.setCameraParameters(mainRobot.programPreferences.getInt("Exposure", 10), 
 				mainRobot.programPreferences.getInt("WB", 5200),
 				mainRobot.programPreferences.getInt("Brightness", 50));
 		
@@ -106,27 +118,34 @@ public class TeleopTest extends TeleopProgram
 			//Shooter control, when holding RB the shooter motor starts followed by the loader motor after a short delay
 			mShooter.shooterControl(mainRobot.gamepad1.getRawButton(6));
 			
-			//Hold X to enable intake, may change to a toggle later on
+			
+			//Hold X to use intake
 			if (mainRobot.gamepad1.getRawButton(3))
 			{
 				mainRobot.hardwareMap.intake.set(1);
-			} else
+			}
+			else
 			{
 				mainRobot.hardwareMap.intake.set(0);
 			}
 			
-			//Hold Y to open gear holder
+			
+			
+			//Press Y to auto deposit gear
 			if (mainRobot.gamepad1.getRawButton(4))
 			{
-				mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kForward);
-			} else
-			{
-				mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
-			}
+				pushGear();
+			} 
 			
-			//Use right joystick for winch
-			double winchPower = GeneralFunctions.toExponential(GeneralFunctions.deadzone(mainRobot.gamepad1.getY(Hand.kLeft), 0.2), DRIVE_EXPONENT);
-			mainRobot.hardwareMap.winch.set(winchPower);
+			//Hold B for winch
+			if(mainRobot.gamepad1.getRawButton(2))
+			{
+				mainRobot.hardwareMap.winch.set(-1);
+			}
+			else
+			{
+				mainRobot.hardwareMap.winch.set(0);
+			}
 			
 			//Hold left bumper to camera aim
 			if (mainRobot.gamepad1.getRawButton(5))
@@ -136,7 +155,10 @@ public class TeleopTest extends TeleopProgram
 			{
 				targetMode = false;
 			}
-		}
+			
+
+			
+			
 
 		SmartDashboard.putNumber("Rectangle Area", visionProc.getRectangleArea());
 		SmartDashboard.putNumber("Rectangle Width", visionProc.getRectangleWidth());
@@ -153,7 +175,10 @@ public class TeleopTest extends TeleopProgram
 		SmartDashboard.putBoolean("Pressure Switch Value", mainRobot.hardwareMap.compressor.getPressureSwitchValue());
 		SmartDashboard.putBoolean("Compressor", mainRobot.hardwareMap.compressor.getClosedLoopControl());
 		SmartDashboard.putBoolean("Target Mode Value", targetMode);
+		SmartDashboard.putNumber("Left Shooter Period Length", mainRobot.hardwareMap.hallSR.getPeriod());
+		SmartDashboard.putNumber("Right Shooter Period Length", mainRobot.hardwareMap.hallSR.getPeriod());
 		
+		}
 	}
 
 	//Called once right when the robot is disabled
@@ -193,9 +218,9 @@ public class TeleopTest extends TeleopProgram
 	
 	public void visionAlign()
 	{
-		visionProc.setPidValues(1, 3, 0.2);
+		visionProc.setPidValues(3, 0.02, 1);
 		visionProc.pidVisionAim();
-		double[] pidValues = visionProc.pidVisionAim();
+		pidValues = visionProc.getVisionShift(0.5);
 		pX = pidValues[0];
 		pY = pidValues[1];
 		if(targetMode)
@@ -203,10 +228,65 @@ public class TeleopTest extends TeleopProgram
 			leftPower += pX;
 			rightPower -= pX;
 		}
-		if (targetMode && pX < xDeadzone)
-		{
-			leftPower += pY;
-			rightPower += pY;
-		}
+		
 	}
+	
+	public void forwardWithGyro(double power, double time)
+	{
+		//Save the time we started this command
+		long startTime = System.currentTimeMillis();
+		
+		//Set the PID system so the output will be between -1 and 1
+		gyroPID.setMaxOutput(1.0);
+		try
+		{
+			//Loop until enough time has passed or this thread has been interrupted
+			while(System.currentTimeMillis() - startTime < time*1000 && !Thread.interrupted())
+			{
+				//Set the target and sensor values for the PID controller
+				gyroPID.setParameters(mainRobot.hardwareMap.gyro.getAngle(), currentHeading);
+				
+				//PID magic occurs here (OOOOH, AHHHH)
+				double pidOutput = gyroPID.calculateOutput();
+				
+				//for debugging purposes
+				/*SmartDashboard.putNumber("Right Power", power - pidOutput);
+				SmartDashboard.putNumber("Left Power", power + pidOutput);
+				SmartDashboard.putNumber("Gyro Angle", autoProgram.mainRobot.hardwareMap.gyro.getAngle());*/
+				
+				//Adjust the power accordingly
+				assignPower(power + pidOutput, power - pidOutput);
+				
+				//cullen thing <- Prevent crashing (the program, not the robot, unfortunately)
+				Thread.sleep(1);
+			}
+		} catch (InterruptedException e) {}
+		
+		//stop motors
+		assignPower(0,0);
+	}
+	
+	public void assignPower(double powerL, double powerR)
+	{
+		mainRobot.hardwareMap.lfDrive.set(powerL);
+		mainRobot.hardwareMap.lrDrive.set(powerL);
+		mainRobot.hardwareMap.rfDrive.set(-powerR);
+		mainRobot.hardwareMap.rrDrive.set(-powerR);
+	}
+	
+	public void pushGear()
+	{
+		if(!gearBusy)
+		{
+			gearBusy = true;
+			mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kForward);
+			forwardWithGyro(-0.2, 0.65);
+			mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
+			forwardWithGyro(0.13, 1.25);
+			
+			gearBusy = false;
+		}
+		
+	}
+	
 }

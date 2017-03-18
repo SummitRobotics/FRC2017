@@ -1,23 +1,27 @@
 package org.usfirst.frc.team5468.robot;
 
+import Plugins.PID;
+
 public class Shooters{
 	
 	Robot mRobot;
-	
-	public Shooters(Robot mainRobot) {
-		mRobot = mainRobot;
-	}
-	
+
 	double shootStart = 0;
 	final double SHOOTER_DELAY = 1.5;
 	boolean shootersEnabled = false;
+	double targetShooterPeriod = 0.025;
 	
 	int state = 1;
 	int nextState;
+	
+	public Shooters(Robot robot)
+	{
+		mRobot = robot;
+	}
 
 	public void shooterControl(boolean shooterButton)
 	{
-	//new state machine, should do the same thing.	
+		//new state machine, should do the same thing.	
 		switch(state){
 		case 1:
 			mRobot.hardwareMap.rShooter.set(0);
@@ -31,8 +35,8 @@ public class Shooters{
 			break;
 			
 		case 2:
-			mRobot.hardwareMap.rShooter.set(-mRobot.hardwareMap.shootPower);
-			mRobot.hardwareMap.lShooter.set(mRobot.hardwareMap.shootPower);
+			mRobot.hardwareMap.rShooter.set(-shooterPower);
+			mRobot.hardwareMap.lShooter.set(shooterPower);
 			if(System.currentTimeMillis() - shootStart > SHOOTER_DELAY * 1000){nextState = 3;}
 			if(!shooterButton){nextState = 1;}
 			break;

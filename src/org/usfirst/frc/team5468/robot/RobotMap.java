@@ -25,11 +25,11 @@ public class RobotMap
 	public final int INTAKE_ID = 29;
 	public final int WINCH_ID = 24;
 	
-	public final int hallA_ID = 7;
-	public final int hallB_ID = 3;
+	public final int hallSR_ID = 1;
+	public final int hallSL_ID = 0;
 	
-	public final double shootPower = 0.80;
-	public final double loaderPower = 0.80;
+	public final double shootPower = 0.90;
+	public final double loaderPower = 1;
 	
 	public CANTalon rfDrive;
 	public CANTalon rrDrive;
@@ -50,8 +50,8 @@ public class RobotMap
 	public ADXRS450_Gyro gyro;
 	public BuiltInAccelerometer accelerometer;
 	
-	public Counter hallA;
-	public Counter hallB;
+	public Counter hallSR;
+	public Counter hallSL				;
 	//This is called when an instance of this class is created
 	public RobotMap()
 	{
@@ -84,8 +84,8 @@ public class RobotMap
 			compressor = new Compressor(0);
 			solenoid1 = new DoubleSolenoid(0, 1);
 			
-			hallA = new Counter(hallA_ID);
-			hallB = new Counter(hallB_ID);
+			hallSR = new Counter(hallSR_ID);
+			hallSL = new Counter(hallSL_ID);
 		}
 		catch(Exception e)
 		{

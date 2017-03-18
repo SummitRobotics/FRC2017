@@ -2,23 +2,24 @@ package AutonomousPrograms;
 import org.usfirst.frc.team5468.robot.Robot;
 
 import Templates.*;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import Plugins.*;
 
 //extends our abstract class
-public class hopperShootRedSide extends AutonomousProgram 
+public class gearStraightBlueCenter extends AutonomousProgram 
 {
 	//reference gyro and thread for auto functions
 	//the thread class enables stopping of bot mid-function.
 	//this makes the robot safer and obey rules
 	PID gyroPID;	
-	HSRS autoThread;
+	GStrBC autoThread;
 	HallEffect hall;
 	//Reference for vision
 	Vision visionProc;
 	
 	//constructor
-	public hopperShootRedSide(Robot robot, String name)
+	public gearStraightBlueCenter(Robot robot, String name)
 	{
 		super(robot, name);
 		hall = new HallEffect(robot);
@@ -57,7 +58,7 @@ public class hopperShootRedSide extends AutonomousProgram
 		mainRobot.hardwareMap.gyro.reset();
 				
 		//Create a new auto program thread
-		autoThread = new HSRS(this);
+		autoThread = new GStrBC(this);
 		
 		mainRobot.hardwareMap.lfDrive.enable();
 		mainRobot.hardwareMap.lrDrive.enable();
@@ -66,6 +67,7 @@ public class hopperShootRedSide extends AutonomousProgram
 			
 		//Start executing the auto thread
 		autoThread.start();
+		
 	}
 
 	@Override
@@ -111,21 +113,21 @@ public class hopperShootRedSide extends AutonomousProgram
 }
 
 //This thread will enable functions to run in a safe format
-class HSRS extends Thread
+class GStrBC extends Thread
 {
 	final int MAX_TURN_TIME = 5000; //Maximum time the robot will attempt to turn before giving up (in milliseconds)
 	final int MAX_TURN_ERROR_WAIT = 50; //The time that the robot has be within the turn error before continuing (in milliseconds)
 	final double TURN_ERROR = 1; //The range of acceptable error when turning (in degrees)
 	
 	//Reference the auto class
-	hopperShootRedSide autoProgram;
+	gearStraightBlueCenter autoProgram;
 	
 	//The heading of the robot relative to its starting orientation (in degrees)
 	//This ensures the robot won't drift off course in-between heading specific commands
 	double currentHeading;
 
 	//Constructor saves an instance of auto class for reference
-	public HSRS (hopperShootRedSide program)
+	public GStrBC (gearStraightBlueCenter program)
 	{
 		autoProgram = program;
 		
@@ -137,38 +139,35 @@ class HSRS extends Thread
 	public void run ()
 	{
 		//RED
-		//Drive forward to blue hopper
-		forwardWithGyro(0.5, 1.25);
+		//Forward to gear
+		forwardWithGyro(0.5, 1.2);
+		forwardWithGyro(0.1, 1.2);
+		autoProgram.mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kForward);
+		waitForTime(0.6);
 		
-		//Turn right to hopper
-		turnWithGyro(0.8, 86);
+		//Pushing gear further on
+		forwardWithGyro(-0.2, 0.65);
+		autoProgram.mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
+		forwardWithGyro(0.13, 1.25);
 		
-		//Drive to hopper
-		forwardWithGyro(0.5, 0.35);
-		forwardWithGyro(0.2, 1.75);
-		
-		//Wait for a second
-		waitForTime(2);
-		
-		//Back away from hopper
-		forwardWithGyro(-0.5, 0.3);
-		autoProgram.mainRobot.hardwareMap.rShooter.set(-autoProgram.mainRobot.hardwareMap.shootPower);
-		autoProgram.mainRobot.hardwareMap.lShooter.set(autoProgram.mainRobot.hardwareMap.shootPower);
-		
+		//Back away from gear
+		forwardWithGyro(-0.13, 0.4);
+		forwardWithGyro(-0.5, 0.6);
+		autoProgram.mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
 		autoProgram.mainRobot.hardwareMap.intake.set(1);
 		
-		//Turn right to boiler.
-		turnWithGyro(0.8, 57);
+		//Turn left 75 degrees
+		turnWithGyro(1, -75);
 		
-		//Drive forward towards boiler
-		forwardWithGyro(0.5, 0.45);
+		//Go forward for 0.5 seconds
+		forwardWithGyro(0.5, 1.9);
 		
-		//Wait
-		waitForTime(0.5);
+		//Turn right 75 degrees
+		turnWithGyro(1, 75);
 		
-		//Turn on loaders and blenders
-		autoProgram.mainRobot.hardwareMap.rLoader.set(autoProgram.mainRobot.hardwareMap.loaderPower);
-		autoProgram.mainRobot.hardwareMap.lLoader.set(-autoProgram.mainRobot.hardwareMap.loaderPower);
+		//Go forward past line
+		forwardWithGyro(0.25, 0.1);
+		forwardWithGyro(0.9, 3);
 	}
 	
 	

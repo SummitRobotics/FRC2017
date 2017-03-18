@@ -148,7 +148,7 @@ class HSRC extends Thread
 		autoProgram.mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
 		
 		//Turn right 90 degrees
-		turnWithGyro(0.5, 90);
+		turnWithGyro(0.8, 90);
 		
 		//Go forward for 0.5 seconds
 		forwardWithGyro(0.5, 0.65);
