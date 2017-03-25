@@ -7,7 +7,6 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.RotatedRect;
 import org.opencv.imgproc.Imgproc;
-import org.usfirst.frc.team5468.robot.Robot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,20 +22,6 @@ public class Vision
 {
 	//This will hold an instance of the camera being used for vision
 	public UsbCamera camera;
-	
-	
-	PID pid;
-	
-	public double pV = 1;
-	public double iV = 3;
-	public double dV = 0.2;
-	
-	double pidResultX = 0;
-	double pidResultY = 0;
-	
-	//Center cordinates of ideal position
-	public double iX;
-	public double iY;
 	
 	//Cache the width and height of the image
 	public int imgWidth, imgHeight;
@@ -68,10 +53,6 @@ public class Vision
 		imgWidth = width;
 		imgHeight = height;
 		updateFrequency = updateFramerate;
-		
-		
-		pid = new PID(pV,iV,dV);
-		
 	}
 	
 	//This function starts the vision thread
@@ -123,7 +104,7 @@ public class Vision
 	//This function sets the camera's exposure and white balance
 	public void setCameraParameters(int exposure, int whiteBalance, int brightness)
 	{
-		camera.setExposureAuto();
+		camera.setExposureManual(exposure);
 		camera.setBrightness(brightness);
 		camera.setWhiteBalanceManual(whiteBalance);
 	}
@@ -182,37 +163,14 @@ public class Vision
 		return 0;
 	}
 	
-	public double[] getVisionShift(double power){
-		return visionThread.visionPID(power);
-	}
-	
-	public void setPidValues(double p, double i, double d)
+	public double getTargetAngle()
 	{
-		pV = p;
-		iV = i;
-		dV = d;
-		pid = new PID(pV,iV,dV);
+		if(visionThread != null && visionThread.targetsFound > 0)
+		{
+			return visionThread.targetAngle;
+		}
+		return 0;
 	}
-	
-	public double[] pidVisionAim()
-	{
-		double tX = getTargetScreenX();
-		double tY = getTargetScreenX();
-		
-		pid.setGains(pV, iV, dV);
-		
-		//Calculate X Error
-		pid.setParameters(tX, iX);
-		pidResultX = pid.calculateOutput();
-		
-		//Calculate Y Error
-		pid.setParameters(tY, iY);
-		pidResultY = pid.calculateOutput();
-		
-		return new double[] {pidResultX, pidResultY};
-	}
-	
-	
 }
 
 //This is the class that will be executed on a separate thread
@@ -259,6 +217,7 @@ class VisionThread extends Thread
 	public volatile RotatedRect target2;
 	public volatile int targetsFound;
 	public volatile double targetDistance;
+	public volatile double targetAngle;
 	
 	//Called when an instance of this class is created
 	public VisionThread (String name, VideoSource videoSource, int width, int height, double framerate)
@@ -407,6 +366,7 @@ class VisionThread extends Thread
 				targetsFound++;
 				
 				targetDistance = calculateDistance(target1.boundingRect().width);
+				targetAngle = calculateTargetAngle(target1.boundingRect().x);
 			}
 			
 			//Store the second largest rectangle
@@ -414,6 +374,7 @@ class VisionThread extends Thread
 			{
 				target2 = Imgproc.minAreaRect(new MatOfPoint2f(contours.get(secondBiggestAreaIndex).toArray()));
 				targetsFound++;
+				targetAngle = calculateTargetAngle((target1.boundingRect().x + target2.boundingRect().x) / 2.0);
 			}
 		}
 	}
@@ -453,6 +414,11 @@ class VisionThread extends Thread
 		
 		//Scale a triangle that fits the calculated target angle and has an end length of half the width of the target
 		return (targetWidth * 0.5) / Math.tan(targetAngle);
+	}
+	
+	double calculateTargetAngle(double targetXPosition)
+	{
+		return -(180.0/Math.PI)*Math.atan((targetXPosition*targetWidthConversion)/fovPlaneDistance);
 	}
 	
 	//Don't delete these methods = even if you think they will spawn satan

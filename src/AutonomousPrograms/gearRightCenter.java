@@ -2,18 +2,19 @@ package AutonomousPrograms;
 import org.usfirst.frc.team5468.robot.Robot;
 
 import Templates.*;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import Plugins.*;
 
 //extends our abstract class
-public class straightForward extends AutonomousProgram 
+public class gearRightCenter extends AutonomousProgram 
 {
 	//the thread class enables stopping of bot mid-function.
 	//this makes the robot safer and obey rules
 	AutonomousUtilities autoUtilities;
-	SF autoThread;
+	GRC autoThread;
 	
 	//constructor
-	public straightForward(Robot robot, String name)
+	public gearRightCenter(Robot robot, String name)
 	{
 		super(robot, name);
 	}
@@ -35,7 +36,7 @@ public class straightForward extends AutonomousProgram
 		mainRobot.hardwareMap.gyro.reset();
 				
 		//Create a new auto program thread
-		autoThread = new SF(this);
+		autoThread = new GRC(this);
 		
 		mainRobot.hardwareMap.lfDrive.enable();
 		mainRobot.hardwareMap.lrDrive.enable();
@@ -80,13 +81,13 @@ public class straightForward extends AutonomousProgram
 }
 
 //This thread will enable functions to run in a safe format
-class SF extends Thread
+class GRC extends Thread
 {
 	//Reference the auto class
-	straightForward autoProgram;
+	gearRightCenter autoProgram;
 
 	//Constructor saves an instance of auto class for reference
-	public SF (straightForward program)
+	public GRC (gearRightCenter program)
 	{
 		autoProgram = program;
 		
@@ -97,7 +98,36 @@ class SF extends Thread
 	//will follow linear format
 	public void run ()
 	{
-		//Straight
-		autoProgram.autoUtilities.forwardWithGyro(0.75, 2);
+		//RIGHT
+		//Forward to gear
+		autoProgram.autoUtilities.forwardWithGyro(0.5, 1.2);
+		autoProgram.autoUtilities.forwardWithGyro(0.1, 1.2);
+		
+		//Release gear
+		autoProgram.mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kForward);
+		autoProgram.autoUtilities.waitForTime(0.6);
+		
+		//Push gear further on
+		autoProgram.autoUtilities.forwardWithGyro(-0.2, 0.65);
+		autoProgram.mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
+		autoProgram.autoUtilities.forwardWithGyro(0.13, 1.25);
+		
+		//Back away from gear
+		autoProgram.autoUtilities.forwardWithGyro(-0.13, 0.4);
+		autoProgram.autoUtilities.forwardWithGyro(-0.5, 0.6);
+		autoProgram.mainRobot.hardwareMap.intake.set(1);
+		
+		//Turn right 75 degrees
+		autoProgram.autoUtilities.turnWithGyro(1, 75);
+		
+		//Go forward for 0.5 seconds
+		autoProgram.autoUtilities.forwardWithGyro(0.5, 1.9);
+		
+		//Turn left 75 degrees
+		autoProgram.autoUtilities.turnWithGyro(1, -75);
+		
+		//Go forward past line
+		autoProgram.autoUtilities.forwardWithGyro(0.25, 0.1);
+		autoProgram.autoUtilities.forwardWithGyro(0.9, 2.5);
 	}
 }

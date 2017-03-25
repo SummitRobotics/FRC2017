@@ -10,39 +10,38 @@ public class ProgramManager
 	//These hold the number of autonomous and teleop programs
 	public int autonomousProgramCount;
 	public int teleopProgramCount;
-	
+
 	//These hold lists of the autonomous and teleop program classes
 	public List<AutonomousProgram> autonomousPrograms;
 	public List<TeleopProgram> teleopPrograms;	
-	
+
 	//Called when an instance of this class is created
 	public ProgramManager(Robot robot)
 	{
 		//Setup the autonomous and teleop program lists (makes the variables no longer null)
 		autonomousPrograms = new ArrayList<>();
 		teleopPrograms = new ArrayList<>();
-		
+
 		//Add the robot's autonomous programs here...
-		autonomousPrograms.add(new prototype(robot, "Cullen's Prototype"));
-		autonomousPrograms.add(new gearShootBlueCenter(robot, "gearShootBlueCenter"));
-		autonomousPrograms.add(new gearShootRedCenter(robot, "gearShootRedCenter"));
-		autonomousPrograms.add(new hopperShootBlueCenter(robot, "hopperShootBlueCenter"));
-		autonomousPrograms.add(new hopperShootRedCenter(robot, "hopperShootRedCenter"));
-		autonomousPrograms.add(new hopperShootBlueSide(robot, "hopperShootBlueSide"));
-		autonomousPrograms.add(new hopperShootRedSide(robot, "hopperShootRedSide"));
 		autonomousPrograms.add(new straightForward(robot, "straightForward"));
-		autonomousPrograms.add(new gearStraightBlueCenter(robot, "gearStraightBlueCenter"));
-		autonomousPrograms.add(new gearStraightRedCenter(robot, "gearStraightRedCenter"));
-		
+		autonomousPrograms.add(new gearRightCenter(robot, "gearRightCenter"));
+		autonomousPrograms.add(new gearLeftCenter(robot, "gearLeftCenter"));
+		autonomousPrograms.add(new VISgearLeftCenter(robot, "VISgearLeftCenter"));
+		autonomousPrograms.add(new VISgearLeftSide(robot, "VISgearLeftSide"));
+		autonomousPrograms.add(new VISgearRightCenter(robot, "VISgearRightCenter"));
+		autonomousPrograms.add(new VISgearRightSide(robot, "VISgearRightSide"));
+		autonomousPrograms.add(new hopperRight(robot, "hopperRight"));
+		autonomousPrograms.add(new hopperLeft(robot, "hopperLeft"));
+
 		//Add the robot's teleop programs here...
 		teleopPrograms.add(new TeleopTest(robot, "Teleop Test"));
-		
+
 		//Cache the number of autonomous and teleop classes
 		autonomousProgramCount = autonomousPrograms.size();
 		teleopProgramCount = teleopPrograms.size();
-		
+
 	}
-	
+
 	//Find an autonomous program via an index
 	public AutonomousProgram getAutonomousProgram(int index)
 	{
@@ -52,17 +51,17 @@ public class ProgramManager
 			//Return the autonomous program that corresponds to the current index
 			return autonomousPrograms.get(index);
 		}
-		
+
 		//The index is incorrect, so return nothing
 		return null;
 	}
-	
+
 	//Find an autonomous program via its name
 	public AutonomousProgram getAutonomousProgram(String name)
 	{
 		//Setup a return variable and initialize it to null as an error state
 		AutonomousProgram program = null;
-		
+
 		//For each autonomous program...
 		for(int i = 0; i < autonomousProgramCount; i++)
 		{
@@ -71,16 +70,16 @@ public class ProgramManager
 			{
 				//Set the return variable to be this autonomous program (since we found a match)
 				program = getAutonomousProgram(i);
-				
+
 				//Break out of the for loop, since we found a match
 				break;
 			}
 		}
-		
+
 		//Return an autonomous program (if one was found)
 		return program;
 	}
-	
+
 	//Find a teleop program via an index
 	public TeleopProgram getTeleopProgram(int index)
 	{
@@ -90,7 +89,7 @@ public class ProgramManager
 			//Return the teleop program that corresponds to the current index
 			return teleopPrograms.get(index);
 		}
-		
+
 		//The index is incorrect, so return nothing
 		return null;
 	}
@@ -100,7 +99,7 @@ public class ProgramManager
 	{
 		//Setup a return variable and initialize it to null as an error state
 		TeleopProgram program = null;
-		
+
 		//For each teleop program...
 		for(int i = 0; i < teleopProgramCount; i++)
 		{
@@ -109,14 +108,14 @@ public class ProgramManager
 			{
 				//Set the return variable to be this teleop program (since we found a match)
 				program = getTeleopProgram(i);
-				
+
 				//Break out of the for loop, since we found a match
 				break;
 			}
 		}
-		
+
 		//Return a teleop program (if one was found)
 		return program;
 	}
-		
+
 }

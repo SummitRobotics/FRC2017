@@ -32,6 +32,7 @@ public class Robot extends IterativeRobot
 	TeleopProgram teleop = null;
 	
 	public UsbCamera camera;
+	public UsbCamera sCamera;
 	
 	/*
 	 * This function is run when the robot is first started up and should be
@@ -56,9 +57,12 @@ public class Robot extends IterativeRobot
 		//Setup the joysticks
 		setupJoysticks();
 		
-		camera = CameraServer.getInstance().startAutomaticCapture();
+		camera = CameraServer.getInstance().startAutomaticCapture(0);
+		sCamera = CameraServer.getInstance().startAutomaticCapture(1);
+		
+		camera.setFPS(15);
+		sCamera.setFPS(15);
 	}
-
 	/**
 	 * This function is called once each time the robot enters Disabled mode.
 	 * You can use it to reset any subsystem information you want to clear when

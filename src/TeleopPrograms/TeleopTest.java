@@ -13,6 +13,17 @@ public class TeleopTest extends TeleopProgram
 	
 	public double maxOutputPower = 1;
 	
+	public final double VISION_H_PID_P = 0.006;
+	public final double VISION_H_PID_I = 0;
+	public final double VISION_H_PID_D = 0;
+	
+	public final double VISION_V_PID_P = 0.006;
+	public final double VISION_V_PID_I = 0;
+	public final double VISION_V_PID_D = 0;
+	
+	public final double TARGET_WANTED_X = 141;
+	public final double TARGET_WANTED_Y = 0;
+	
 	Shooters mShooter;
 	
 	Vision visionProc;
@@ -23,8 +34,14 @@ public class TeleopTest extends TeleopProgram
 	boolean intakeToggle = false;
 	boolean gearBusy = false;
 	
+	boolean gearEnable = false;
+	
 	double pX;
 	double pY;
+	
+	double gearStart = 0;
+	
+	int gearState = 1;
 	
 	double currentHeading;
 	
@@ -36,6 +53,11 @@ public class TeleopTest extends TeleopProgram
 	boolean targetMode = false;
 	
 	PID gyroPID;
+	PID visionHorizontalPID;
+	PID visionVerticalPID;
+	
+	double visionLeftPower = 0;
+	double visionRightPower = 0;
 
 	
 	//This is called when an instance of this class is created
@@ -56,7 +78,9 @@ public class TeleopTest extends TeleopProgram
 		visionProc = new Vision("Vision_Test", mainRobot.camera, 320, 240, 30);
 		
 		//Create new instance of shooters
-		mShooter = new Shooters(mainRobot);
+		mShooter = new Shooters(mainRobot, mainRobot.programPreferences.getDouble("Shooter P Value", 0.001),
+				mainRobot.programPreferences.getDouble("Shooter I Value", 0),
+				mainRobot.programPreferences.getDouble("Shooter D Value", 0));
 		
 		//Get the HSV mask parameters from the robot preferences and set them in the vision system
 		visionProc.setMaskParameters(mainRobot.programPreferences.getInt("Upper Hue", 80),
@@ -77,8 +101,8 @@ public class TeleopTest extends TeleopProgram
 		xDeadzone = mainRobot.programPreferences.getInt("X Deadzone", 2);
 		yDeadzone = mainRobot.programPreferences.getInt("Y Deadzone", 3); 
 		
-		visionProc.iX = mainRobot.programPreferences.getInt("Target position X cordinate", visionProc.imgWidth / 2);
-		visionProc.iY = mainRobot.programPreferences.getInt("Target position Y cordinate", visionProc.imgHeight / 2);
+		//visionProc.iX = mainRobot.programPreferences.getInt("Target position X cordinate", visionProc.imgWidth / 2);
+		//visionProc.iY = mainRobot.programPreferences.getInt("Target position Y cordinate", visionProc.imgHeight / 2);
 		
 		mainRobot.hardwareMap.compressor.setClosedLoopControl(true);
 		
@@ -86,6 +110,13 @@ public class TeleopTest extends TeleopProgram
 		mainRobot.hardwareMap.lrDrive.enable();
 		mainRobot.hardwareMap.rfDrive.enable();
 		mainRobot.hardwareMap.rrDrive.enable();
+		
+		assignPower(0,0);
+		
+		visionHorizontalPID = new PID(mainRobot.programPreferences.getDouble("Vision PID P", 0.006), 
+				mainRobot.programPreferences.getDouble("Vision PID I", 0.0), 
+				mainRobot.programPreferences.getDouble("Vision PID D", 0.0));
+		visionVerticalPID = new PID (VISION_V_PID_P, VISION_V_PID_I, VISION_V_PID_D);
 	}
 
 	//Called periodically during teleop
@@ -106,14 +137,11 @@ public class TeleopTest extends TeleopProgram
 			
 			visionAlign();
 			
-			leftPower = GeneralFunctions.clamp(leftPower, -1, 1);
-			rightPower = -GeneralFunctions.clamp(rightPower, -1, 1);
 			
-			mainRobot.hardwareMap.lfDrive.set(leftPower);
-			mainRobot.hardwareMap.lrDrive.set(leftPower);
+			leftPower = GeneralFunctions.clamp(leftPower + visionLeftPower, -1, 1);
+			rightPower = GeneralFunctions.clamp(rightPower + visionRightPower, -1, 1);
 			
-			mainRobot.hardwareMap.rfDrive.set(rightPower);
-			mainRobot.hardwareMap.rrDrive.set(rightPower);
+			assignPower(leftPower, rightPower);
 			
 			//Shooter control, when holding RB the shooter motor starts followed by the loader motor after a short delay
 			mShooter.shooterControl(mainRobot.gamepad1.getRawButton(6));
@@ -131,11 +159,23 @@ public class TeleopTest extends TeleopProgram
 			
 			
 			
-			//Press Y to auto deposit gear
+			//Hold Y to deposit gear
 			if (mainRobot.gamepad1.getRawButton(4))
 			{
-				pushGear();
-			} 
+				mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kForward);
+			} else
+			{
+				mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
+			}
+			
+			
+			/*
+			//Press Y to auto deposit gear
+			if(mainRobot.gamepad1.getRawButton(4)){
+				gearEnable = true;
+			}
+			pushGear();
+			*/
 			
 			//Hold B for winch
 			if(mainRobot.gamepad1.getRawButton(2))
@@ -156,10 +196,16 @@ public class TeleopTest extends TeleopProgram
 				targetMode = false;
 			}
 			
-
+			//Hold A to open gear flap TODO: Might need to be reversed, just change around the 180 and 0 in the gearflap.setAngle()
+			if(mainRobot.gamepad1.getRawButton(1))
+			{
+				mainRobot.hardwareMap.gearFlap.setAngle(180);
+			}
+			else
+			{
+				mainRobot.hardwareMap.gearFlap.setAngle(0);
+			}
 			
-			
-
 		SmartDashboard.putNumber("Rectangle Area", visionProc.getRectangleArea());
 		SmartDashboard.putNumber("Rectangle Width", visionProc.getRectangleWidth());
 		SmartDashboard.putNumber("Rectangle Aspect", visionProc.getRectangleAspect());
@@ -186,16 +232,18 @@ public class TeleopTest extends TeleopProgram
 	public void teleopDisabledInit() 
 	{
 		// TODO Auto-generated method stub
-		mainRobot.hardwareMap.lfDrive.set(0); 
-		mainRobot.hardwareMap.lrDrive.set(0);
-		
-		mainRobot.hardwareMap.rfDrive.set(0);
-		mainRobot.hardwareMap.rrDrive.set(0);
+		assignPower(0, 0);
 		
 		mainRobot.hardwareMap.lfDrive.disable();
 		mainRobot.hardwareMap.lrDrive.disable();
 		mainRobot.hardwareMap.rfDrive.disable();
 		mainRobot.hardwareMap.rrDrive.disable();
+		mainRobot.hardwareMap.rShooter.disable();
+		mainRobot.hardwareMap.lShooter.disable();
+		mainRobot.hardwareMap.rShooter.disable();
+		mainRobot.hardwareMap.rShooter.disable();
+		mainRobot.hardwareMap.rShooter.disable();
+		mainRobot.hardwareMap.rShooter.disable();
 		
 		//Stop the vision system
 		visionProc.stopVision();
@@ -218,15 +266,20 @@ public class TeleopTest extends TeleopProgram
 	
 	public void visionAlign()
 	{
-		visionProc.setPidValues(3, 0.02, 1);
-		visionProc.pidVisionAim();
-		pidValues = visionProc.getVisionShift(0.5);
-		pX = pidValues[0];
-		pY = pidValues[1];
+		//visionProc.setPidValues(0.006, 0.0, 0);
+		//visionProc.pidVisionAim();
+		//pidValues = visionProc.pidVisionAim();
+		visionHorizontalPID.setParameters(visionProc.getTargetScreenX(), TARGET_WANTED_X);
+		pX = visionHorizontalPID.calculateOutput();
 		if(targetMode)
 		{
-			leftPower += pX;
-			rightPower -= pX;
+			visionLeftPower = -pX;
+			visionRightPower = pX;
+		}
+		else
+		{
+			visionLeftPower = 0;
+			visionRightPower = 0;
 		}
 		
 	}
@@ -258,6 +311,7 @@ public class TeleopTest extends TeleopProgram
 				assignPower(power + pidOutput, power - pidOutput);
 				
 				//cullen thing <- Prevent crashing (the program, not the robot, unfortunately)
+				//TODO If its crashing its probably this line below. I'm sorry
 				Thread.sleep(1);
 			}
 		} catch (InterruptedException e) {}
@@ -276,17 +330,56 @@ public class TeleopTest extends TeleopProgram
 	
 	public void pushGear()
 	{
-		if(!gearBusy)
-		{
+		
+		
+		if(!gearBusy && gearEnable){
 			gearBusy = true;
-			mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kForward);
-			forwardWithGyro(-0.2, 0.65);
-			mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
-			forwardWithGyro(0.13, 1.25);
 			
-			gearBusy = false;
+			switch(gearState){
+			case 1:
+				mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kForward);
+				gearState = 2;
+				gearStart = System.currentTimeMillis();
+			
+			case 2:
+				if(System.currentTimeMillis() - gearStart > 600){gearState = 3;}
+				
+			case 3:
+				//Pushing gear further on
+				forwardWithGyro(-0.2, 0.65);
+				mainRobot.hardwareMap.solenoid1.set(DoubleSolenoid.Value.kReverse);
+				forwardWithGyro(0.13, 1.25);
+				
+				//Back away from gear
+				forwardWithGyro(-0.13, 0.4);
+				forwardWithGyro(-0.5, 0.6);
+				
+				gearBusy = false;
+				gearState = 1;
+				gearEnable = false;
+			}
+		
 		}
 		
+		
 	}
+	
+	//Make the robot wait for some time
+	/*public void waitForTime(double time)
+	{
+		//Save the current time
+		long startTime = System.currentTimeMillis();
+		
+		try
+		{
+			//Loop until enough time has passed
+			while (System.currentTimeMillis() - startTime < time * 1000)
+			{
+				//Don't crash pls
+				//TODO omg again im sory
+				//Thread.sleep(10);
+			}
+		} 
+	}*/
 	
 }
